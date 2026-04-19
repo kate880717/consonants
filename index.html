@@ -758,11 +758,20 @@
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRec();
             recognition.lang = 'ko-KR';
+            // 실시간 미리보기 지원
             recognition.interimResults = true;
+            recognition.continuous = true; // 계속 듣기
             recognition.onresult = function(e) {
-                finalTranscript = '';
-                for (let i = e.resultIndex; i < e.results.length; ++i) {
-                    finalTranscript += e.results[i][0].transcript;
+                let currentStt = '';
+                for (let i = 0; i < e.results.length; ++i) {
+                    currentStt += e.results[i][0].transcript;
+                }
+                finalTranscript = currentStt;
+                
+                // 화면에 실시간으로 받아적고 있는 글자를 보여줌!
+                const statusEl = document.getElementById('record-status');
+                if (statusEl && recordState === 1) {
+                    statusEl.innerHTML = `<span style="color:#555;">받아쓰는 중 ➡️</span> <strong style="color:#00d2d3; font-size:36px; background:#fff; padding:5px 15px; border-radius:15px; box-shadow:0 3px 5px rgba(0,0,0,0.1)">${finalTranscript}</strong>`;
                 }
             };
         }
@@ -808,26 +817,32 @@
                 // Start Recording
                 try {
                     finalTranscript = '';
-                    // 모바일 기기에서의 시각적/청각적 UI 팝업을 선생님의 교실 운영 상 감수하고, 필수로 STT 시행
-                    if (recognition) recognition.start();
+                    if (recognition) {
+                        try { recognition.abort(); } catch(e){} // 기존 세션 안전 종료
+                        recognition.start();
+                    }
                     if (mediaRecorder && mediaRecorder.state !== 'recording') mediaRecorder.start();
                     recordState = 1;
                     btn.textContent = '⏹️';
                     btn.classList.add('recording-anim');
-                    status.textContent = '녹음 중... 다 읽으면 정지 버튼을 누르세요. (받아쓰기 진행중)';
+                    status.innerHTML = `<span style="color:#555">녹음 중... 말소리를 내면 이곳에 글자가 찍힙니다!</span>`;
                 } catch (e) { console.error(e); }
             } else {
                 // Stop Recording
                 recordState = 2;
                 btn.textContent = '⏳';
                 btn.classList.remove('recording-anim');
-                status.textContent = '저장 중입니다...';
+                status.textContent = '저장 중입니다... (STT 분석 중)';
 
-                if (recognition) { try { recognition.stop(); } catch(e){} }
+                // 사용자가 말을 마치자마자 정지 버튼을 눌렀을 때, 텍스트 변환이 미처 안 끝난 상태로 
+                // 강제 종료되는 것을 막기 위해 recognition.stop()을 살짝 뒤로 미룹니다.
+                setTimeout(() => {
+                    if (recognition) { try { recognition.stop(); } catch(e){} }
+                }, 400);
 
                 if (mediaRecorder) {
                     mediaRecorder.onstop = () => {
-                        setTimeout(() => { // STT 결과가 최종 반영될 수 있도록 짧은 대기
+                        setTimeout(() => { // STT 결과가 최종 반영될 수 있도록 충분히 대기
                             audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                             const reader = new FileReader();
                             reader.readAsDataURL(audioBlob);
@@ -837,7 +852,7 @@
                                 document.getElementById('record-overlay').style.display = 'none';
                                 if (finishRecordCallback) finishRecordCallback(finalTranscript);
                             };
-                        }, 400);
+                        }, 700); // STT 분석 정확도를 위해 여유시간 700ms 확보
                     };
                     if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
                 }
