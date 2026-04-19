@@ -320,10 +320,13 @@
 
         <!-- Record Overlays -->
         <div id="record-overlay" class="record-overlay">
-            <h2 style="font-size: 48px; margin-bottom: 10px;">🎙️ 큰 소리로 읽어보세요!</h2>
+            <h2 style="font-size: 48px; margin-bottom: 10px;">🎙️ 큰 소리로 천천히 읽어보세요!</h2>
             <div id="record-word" style="font-size: 64px; color: #4facfe; margin-bottom: 30px;">단어</div>
             <button id="record-btn" class="record-btn" onclick="handleRecordClick()">🎤</button>
-            <div id="record-status" style="font-size: 24px; margin-top: 20px; color: #555;">마이크 버튼을 누르면 녹음이 시작됩니다.</div>
+            <div id="record-instruction" style="font-size: 28px; line-height:1.4; margin-top: 25px; color: #e15f41; font-weight:bold; display:none; background:#fff3cd; padding:15px 30px; border-radius:20px; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.1);">
+                큰 소리로 천천히 또박또박 읽어보고,<br>아래 화면에 <span style="color:#000;">정확한 글자</span>가 뜨면 ⏹️ 정지 버튼을 누르세요!
+            </div>
+            <div id="record-status" style="font-size: 32px; margin-top: 25px; color: #555; height:50px;">마이크 버튼을 누르면 녹음이 시작됩니다.</div>
         </div>
     </div>
 
@@ -793,6 +796,7 @@
             const btn = document.getElementById('record-btn');
             btn.textContent = '🎤';
             btn.classList.remove('recording-anim');
+            document.getElementById('record-instruction').style.display = 'none';
             document.getElementById('record-status').textContent = '마이크 버튼을 누르면 녹음이 시작됩니다.';
 
             overlay.style.display = 'flex';
@@ -825,12 +829,14 @@
                     recordState = 1;
                     btn.textContent = '⏹️';
                     btn.classList.add('recording-anim');
-                    status.innerHTML = `<span style="color:#555">녹음 중... 말소리를 내면 이곳에 글자가 찍힙니다!</span>`;
+                    document.getElementById('record-instruction').style.display = 'block';
+                    status.innerHTML = `<span style="color:#555">여기에 여러분의 목소리가 글자로 나타납니다!</span>`;
                 } catch (e) { console.error(e); }
             } else {
                 // Stop Recording
                 recordState = 2;
                 btn.textContent = '⏳';
+                document.getElementById('record-instruction').style.display = 'none';
                 btn.classList.remove('recording-anim');
                 status.textContent = '저장 중입니다... (STT 분석 중)';
 
