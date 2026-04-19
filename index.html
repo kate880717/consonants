@@ -460,6 +460,30 @@
             }
         };
 
+        function renderLevelSelect() {
+            currentUser = document.getElementById('student-select').value;
+            if (!micInitialized) {
+                alert("원활한 진행과 STT(받아쓰기) 기능을 위해 [마이크 설정하기] 버튼을 먼저 눌러 마이크를 허용해주세요.");
+            }
+            contentDiv.innerHTML = `
+              <div class="intro-title" style="margin-bottom:40px;">문제 개수 선택</div>
+              <h2 style="font-size:32px; color:#555; margin-bottom:40px;">몇 문제를 풀어볼까요?</h2>
+              <div class="choices-container" style="justify-content:center; gap:30px;">
+                <button class="btn-primary" style="font-size:48px; padding:30px 40px; background:#feca57;" onclick="startWithCount(3)">3개 🌱</button>
+                <button class="btn-primary" style="font-size:48px; padding:30px 40px; background:#1dd1a1;" onclick="startWithCount(5)">5개 🌿</button>
+                <button class="btn-primary" style="font-size:48px; padding:30px 40px; background:#4facfe;" onclick="startWithCount(10)">10개 🌳</button>
+              </div>
+            `;
+        }
+
+        function startWithCount(count) {
+            // Randomize and limit questions per stage based on selected count
+            appState.stage1 = [...appState.stage1].sort(() => 0.5 - Math.random()).slice(0, count);
+            appState.stage2 = [...appState.stage2].sort(() => 0.5 - Math.random()).slice(0, count);
+            appState.stage3 = [...appState.stage3].sort(() => 0.5 - Math.random()).slice(0, count);
+            startGame(1);
+        }
+
         function renderIntro() {
             let options = appState.students.map(s => `<option value="${s}">${s}</option>`).join('');
             contentDiv.innerHTML = `
@@ -470,19 +494,12 @@
       <br><br>
       <button class="btn-secondary" id="init-mic-btn" onclick="requestMic()">🎤 마이크 설정하기</button>
       <br>
-      <button class="btn-primary" style="background:#1dd1a1;" onclick="startGame(1)">▶️ 1단계 시작하기</button>
-      <button class="btn-primary" onclick="startGame(2)">▶️ 2단계 시작하기</button>
-      <button class="btn-primary" style="background:#48dbfb;" onclick="startGame(3)">▶️ 3단계 시작하기</button>
+      <button class="btn-primary" style="background:#1dd1a1;" onclick="renderLevelSelect()">▶️ 전체 학습 시작하기</button>
     `;
         }
 
         function startGame(stage) {
-            currentUser = document.getElementById('student-select').value;
             learningHistory = [];
-            if (!micInitialized) {
-                alert("원활한 진행을 위해 [마이크 설정하기] 버튼을 먼저 눌러 허용해주세요.");
-                // Soft-enforcement, don't hard block just in case of environment issue
-            }
             currentIndex = 0;
             currentStage = stage;
             if (stage === 1) renderStage1();
@@ -503,19 +520,20 @@
             }, 1000);
         }
 
-        function logResult(wordPlayed, actionDesc, isCorrect, nextCallback) {
+        function logResult(wordPlayed, actionDesc, isCorrect, speechText, nextCallback) {
             // Save locally
             learningHistory.push({
                 word: wordPlayed,
                 action: actionDesc,
                 audioBlob: audioBlob
             });
-            console.log(`[LOG] ${currentUser} | Stage ${currentStage} | ${actionDesc} | Correct:${isCorrect}`);
+            console.log(`[LOG] ${currentUser} | Stage ${currentStage} | ${actionDesc} | Correct:${isCorrect} | Speech:${speechText}`);
 
             // Prepare Data
             const payload = {
                 student: currentUser, stage: currentStage, action: actionDesc,
-                isCorrect: isCorrect ? 'O' : 'X', audioBase64: audioBase64, audioType: 'audio/webm'
+                isCorrect: isCorrect ? 'O' : 'X', speechText: speechText, 
+                audioBase64: audioBase64, audioType: 'audio/webm'
             };
 
             if (GAS_URL && GAS_URL.startsWith('http')) {
@@ -568,8 +586,8 @@
                 return;
             }
             showFeedbackOverlay(true, () => {
-                openRecordOverlay(problem.Answer, () => {
-                    logResult(problem.Answer, `Stage1: ${problem.Question}, Chosen: ${selectedAns}`, true, () => {
+                openRecordOverlay(problem.Answer, (sttResult) => {
+                    logResult(problem.Answer, `Stage1: ${problem.Question}, Chosen: ${selectedAns}`, true, sttResult, () => {
                         currentIndex++;
                         renderStage1();
                     });
@@ -632,8 +650,8 @@
             document.querySelector('.problem-box').innerHTML = problem.Word;
             document.querySelector('.problem-box').style.color = '#1dd1a1';
             showFeedbackOverlay(true, () => {
-                openRecordOverlay(problem.Word, () => {
-                    logResult(problem.Word, `Word: ${problem.Word}, Chosen: ${selectedChar}`, true, () => {
+                openRecordOverlay(problem.Word, (sttResult) => {
+                    logResult(problem.Word, `Stage2: ${problem.Question}, Chosen: ${selectedChar}`, true, sttResult, () => {
                         currentIndex++;
                         renderStage2();
                     });
@@ -671,8 +689,8 @@
                 return;
             }
             showFeedbackOverlay(true, () => {
-                openRecordOverlay(problem.Word, () => {
-                    logResult(problem.Word, `Pronunciation: ${problem.Word}, Picked: ${selectedAns}`, true, () => {
+                openRecordOverlay(problem.Word, (sttResult) => {
+                    logResult(problem.Word, `Stage3 Pronunciation: ${problem.Word}, Picked: ${selectedAns}`, true, sttResult, () => {
                         currentIndex++;
                         renderStage3Concept();
                     });
@@ -683,20 +701,36 @@
 
 
         /* =========================================
-           8. Audio Recording Overlay UI
+           8. Audio Recording & STT Overlay UI
            ========================================= */
         let recordState = 0; // 0: Idle, 1: Recording
         let finishRecordCallback = null;
+        let finalTranscript = '';
+        let recognition = null;
+        
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRec();
+            recognition.lang = 'ko-KR';
+            recognition.interimResults = true;
+            recognition.onresult = function(e) {
+                finalTranscript = '';
+                for (let i = e.resultIndex; i < e.results.length; ++i) {
+                    finalTranscript += e.results[i][0].transcript;
+                }
+            };
+        }
 
         function openRecordOverlay(wordToRead, callback, prefixMsg = '') {
             finishRecordCallback = callback;
             audioBase64 = '';
             audioChunks = [];
             recordState = 0;
+            finalTranscript = '';
 
             if (!mediaRecorder) {
                 // No Mic -> Skip recording
-                finishRecordCallback();
+                finishRecordCallback(finalTranscript);
                 return;
             }
 
@@ -723,11 +757,13 @@
             if (recordState === 0) {
                 // Start Recording
                 try {
-                    if (mediaRecorder.state !== 'recording') mediaRecorder.start();
+                    finalTranscript = '';
+                    if (recognition) recognition.start();
+                    if (mediaRecorder && mediaRecorder.state !== 'recording') mediaRecorder.start();
                     recordState = 1;
                     btn.textContent = '⏹️';
                     btn.classList.add('recording-anim');
-                    status.textContent = '녹음 중... 다 읽으면 정지 버튼을 누르세요.';
+                    status.textContent = '녹음되는 중... 다 읽으면 정지 버튼을 누르세요. (STT 받아쓰기 중)';
                 } catch (e) { console.error(e); }
             } else {
                 // Stop Recording
@@ -735,19 +771,25 @@
                 btn.textContent = '⏳';
                 btn.classList.remove('recording-anim');
                 status.textContent = '처리 중입니다...';
+                
+                if (recognition) { try { recognition.stop(); } catch(e){} }
 
-                mediaRecorder.onstop = () => {
-                    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const reader = new FileReader();
-                    reader.readAsDataURL(audioBlob);
-                    reader.onloadend = () => {
-                        const b64 = reader.result.split(',')[1];
-                        audioBase64 = b64 || '';
-                        document.getElementById('record-overlay').style.display = 'none';
-                        if (finishRecordCallback) finishRecordCallback();
+                if (mediaRecorder) {
+                    mediaRecorder.onstop = () => {
+                        setTimeout(() => { // wait slightly for STT to finalize
+                            audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                            const reader = new FileReader();
+                            reader.readAsDataURL(audioBlob);
+                            reader.onloadend = () => {
+                                const b64 = reader.result.split(',')[1];
+                                audioBase64 = b64 || '';
+                                document.getElementById('record-overlay').style.display = 'none';
+                                if (finishRecordCallback) finishRecordCallback(finalTranscript);
+                            };
+                        }, 500);
                     };
-                };
-                if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+                    if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+                }
             }
         }
 
