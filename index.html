@@ -377,6 +377,7 @@
         let audioBlob = null;
         let audioBase64 = '';
         let micInitialized = false;
+        let isMicRequesting = false;
 
         const contentDiv = document.getElementById('scene-content');
 
@@ -415,20 +416,25 @@
         }
 
         async function requestMic() {
+            if (micInitialized || isMicRequesting) return;
+            isMicRequesting = true;
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 mediaRecorder = new MediaRecorder(stream);
                 mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
 
                 const micBtn = document.getElementById('init-mic-btn');
-                micBtn.textContent = '✅ 마이크 준비 완료';
-                micBtn.style.background = '#1dd1a1';
-                micBtn.disabled = true;
+                if (micBtn) {
+                   micBtn.textContent = '✅ 마이크 준비 완료';
+                   micBtn.style.background = '#1dd1a1';
+                   micBtn.disabled = true;
+                }
                 micInitialized = true;
                 playTTS("마이크가 연결되었습니다.");
             } catch (e) {
-                alert("마이크 사용 권한을 허용해주셔야 학습녹음이 가능합니다.");
                 console.warn("Mic auth failed:", e);
+            } finally {
+                isMicRequesting = false;
             }
         }
 
@@ -460,10 +466,13 @@
             }
         };
 
-        function renderLevelSelect() {
+        async function renderLevelSelect() {
             currentUser = document.getElementById('student-select').value;
             if (!micInitialized) {
-                alert("원활한 진행과 STT(받아쓰기) 기능을 위해 [마이크 설정하기] 버튼을 먼저 눌러 마이크를 허용해주세요.");
+                await requestMic();
+                if (!micInitialized) {
+                    alert("마이크 권한이 허용되지 않았습니다. 듣기 및 쓰기만 진행하며 녹음 요소는 건너뜁니다.");
+                }
             }
             contentDiv.innerHTML = `
               <div class="intro-title" style="margin-bottom:40px;">문제 개수 선택</div>
@@ -476,11 +485,27 @@
             `;
         }
 
+        function getShuffledSlice(originalArray, count) {
+            // Fisher-Yates 완벽 셔플 (랜덤 섞기)
+            let arr = [...originalArray];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr.slice(0, count);
+        }
+
         function startWithCount(count) {
-            // Randomize and limit questions per stage based on selected count
-            appState.stage1 = [...appState.stage1].sort(() => 0.5 - Math.random()).slice(0, count);
-            appState.stage2 = [...appState.stage2].sort(() => 0.5 - Math.random()).slice(0, count);
-            appState.stage3 = [...appState.stage3].sort(() => 0.5 - Math.random()).slice(0, count);
+            if (!appState.originalStage1) {
+                // 백업용 원본 데이터 보존
+                appState.originalStage1 = [...appState.stage1];
+                appState.originalStage2 = [...appState.stage2];
+                appState.originalStage3 = [...appState.stage3];
+            }
+            // 진짜 무작위로 섞은 뒤 원하는 개수(count)만큼만 뽑기
+            appState.stage1 = getShuffledSlice(appState.originalStage1, count);
+            appState.stage2 = getShuffledSlice(appState.originalStage2, count);
+            appState.stage3 = getShuffledSlice(appState.originalStage3, count);
             startGame(1);
         }
 
@@ -488,13 +513,19 @@
             let options = appState.students.map(s => `<option value="${s}">${s}</option>`).join('');
             contentDiv.innerHTML = `
       <h1 class="intro-title">🎉 겹받침 읽고 쓰기 🎉</h1>
+      <div style="background:white; padding:20px 40px; border-radius:20px; border:4px dashed #4facfe; margin-bottom:30px; font-size:28px; color:#555; text-align:center;">
+        <div style="font-weight:bold; color:#4facfe; margin-bottom:10px;">오늘의 모험 순서 🚀</div>
+        <span style="color:#ff9f43">1단계: 읽고 쓰기</span> ➡️ 
+        <span style="color:#1dd1a1">2단계: 받침 고르기</span> ➡️ 
+        <span style="color:#ff6b6b">3단계: 발음 찾기</span>
+      </div>
       <select id="student-select" class="intro-select">
         ${options}
       </select>
       <br><br>
       <button class="btn-secondary" id="init-mic-btn" onclick="requestMic()">🎤 마이크 설정하기</button>
       <br>
-      <button class="btn-primary" style="background:#1dd1a1;" onclick="renderLevelSelect()">▶️ 전체 학습 시작하기</button>
+      <button class="btn-primary" style="background:#1dd1a1;" onclick="renderLevelSelect()">▶️ 시작하기</button>
     `;
         }
 
@@ -536,6 +567,10 @@
                 audioBase64: audioBase64, audioType: 'audio/webm'
             };
 
+            // 네트워크 통신 대기 시간 때문에 다음 문제로 넘어가는 게 버벅거리지 않도록
+            // 콜백(다음 문제 넘어가기)을 먼저 즉시 실행해버립니다!
+            if (nextCallback) nextCallback();
+
             if (GAS_URL && GAS_URL.startsWith('http')) {
                 fetch(GAS_URL, {
                     method: 'POST',
@@ -543,21 +578,32 @@
                     body: JSON.stringify(payload)
                 })
                     .then(res => res.json())
-                    .then(data => { console.log('Saved to Sheet:', data); nextCallback(); })
-                    .catch(err => { console.error('Save failed:', err); nextCallback(); });
-            } else {
-                setTimeout(nextCallback, 300); // Mock delay
+                    .then(data => { console.log('Saved to Sheet:', data); })
+                    .catch(err => { console.error('Save failed:', err); });
             }
         }
 
         /* =========================================
            5.5 Stage 1 Logic
            ========================================= */
+           
+        function renderStageTransition(nextStage, title, nextFuncName) {
+            playTTS(`훌륭해요! 다음은 ${nextStage}단계, ${title} 입니다.`);
+            contentDiv.innerHTML = `
+              <h2 style="font-size:80px; color:#ff9f43; margin-bottom:30px;">🎉 훌륭해요! 🎉</h2>
+              <div style="background:white; padding:40px; border-radius:30px; border:4px solid #1dd1a1; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom:40px;">
+                <div style="font-size:30px; color:#7f8c8d; margin-bottom:15px;">다음 미션</div>
+                <div style="font-size:55px; color:#2c3e50; font-weight:bold;">${nextStage}단계: ${title}</div>
+              </div>
+              <button class="btn-primary" style="background:#4facfe; font-size:40px; padding:20px 60px;" onclick="${nextFuncName}()">▶️ ${nextStage}단계 시작하기</button>
+            `;
+        }
+
         function renderStage1() {
             if (currentIndex >= appState.stage1.length) {
                 currentStage = 2;
                 currentIndex = 0;
-                renderStage2();
+                renderStageTransition(2, "받침 고르기", "renderStage2");
                 return;
             }
             const problem = appState.stage1[currentIndex];
@@ -610,7 +656,7 @@
             if (currentIndex >= appState.stage2.length) {
                 currentStage = 3;
                 currentIndex = 0;
-                renderStage3Concept();
+                renderStageTransition(3, "올바른 발음 고르기", "renderStage3Concept");
                 return;
             }
             const problem = appState.stage2[currentIndex];
@@ -701,7 +747,7 @@
 
 
         /* =========================================
-           8. Audio Recording & STT Overlay UI
+           8. Audio Recording Overlay & STT UI
            ========================================= */
         let recordState = 0; // 0: Idle, 1: Recording
         let finishRecordCallback = null;
@@ -728,10 +774,8 @@
             recordState = 0;
             finalTranscript = '';
 
-            if (!mediaRecorder) {
-                // No Mic -> Skip recording
-                finishRecordCallback(finalTranscript);
-                return;
+            if (!mediaRecorder && !micInitialized) {
+                // If not initialized yet, we will prompt them when they click the mic button
             }
 
             const overlay = document.getElementById('record-overlay');
@@ -750,7 +794,13 @@
             }
         }
 
-        window.handleRecordClick = function () {
+        window.handleRecordClick = async function () {
+            if (!micInitialized || !mediaRecorder) {
+                document.getElementById('record-overlay').style.display = 'none';
+                if (finishRecordCallback) finishRecordCallback('');
+                return;
+            }
+
             const btn = document.getElementById('record-btn');
             const status = document.getElementById('record-status');
 
@@ -758,25 +808,26 @@
                 // Start Recording
                 try {
                     finalTranscript = '';
+                    // 모바일 기기에서의 시각적/청각적 UI 팝업을 선생님의 교실 운영 상 감수하고, 필수로 STT 시행
                     if (recognition) recognition.start();
                     if (mediaRecorder && mediaRecorder.state !== 'recording') mediaRecorder.start();
                     recordState = 1;
                     btn.textContent = '⏹️';
                     btn.classList.add('recording-anim');
-                    status.textContent = '녹음되는 중... 다 읽으면 정지 버튼을 누르세요. (STT 받아쓰기 중)';
+                    status.textContent = '녹음 중... 다 읽으면 정지 버튼을 누르세요. (받아쓰기 진행중)';
                 } catch (e) { console.error(e); }
             } else {
                 // Stop Recording
                 recordState = 2;
                 btn.textContent = '⏳';
                 btn.classList.remove('recording-anim');
-                status.textContent = '처리 중입니다...';
-                
+                status.textContent = '저장 중입니다...';
+
                 if (recognition) { try { recognition.stop(); } catch(e){} }
 
                 if (mediaRecorder) {
                     mediaRecorder.onstop = () => {
-                        setTimeout(() => { // wait slightly for STT to finalize
+                        setTimeout(() => { // STT 결과가 최종 반영될 수 있도록 짧은 대기
                             audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                             const reader = new FileReader();
                             reader.readAsDataURL(audioBlob);
@@ -786,7 +837,7 @@
                                 document.getElementById('record-overlay').style.display = 'none';
                                 if (finishRecordCallback) finishRecordCallback(finalTranscript);
                             };
-                        }, 500);
+                        }, 400);
                     };
                     if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
                 }
