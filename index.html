@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>겹받침 읽고 쓰기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset & Base */
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            /* No scrollbars! */
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            font-family: 'Jua', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        /* Scale Container */
+        #app-container {
+            width: 1280px;
+            height: 720px;
+            /* transform-origin: center center; handled in JS */
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* UI Globals */
+        button {
+            font-family: 'Jua', sans-serif;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: transform 0.1s, filter 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:hover {
+            filter: brightness(1.05);
+        }
+
+        /* Top Bar */
+        .top-bar {
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom: 2px solid #e1e1e1;
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 28px;
+            color: #4facfe;
+        }
+
+        .speaker-btn {
+            font-size: 32px;
+            background: none;
+            box-shadow: none;
+        }
+
+        /* Scene Area */
+        #scene-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* Loading / Intro */
+        .intro-title {
+            font-size: 64px;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .intro-select {
+            font-size: 24px;
+            padding: 10px 20px;
+            font-family: 'Jua', sans-serif;
+            border-radius: 15px;
+            border: 2px solid #ddd;
+        }
+
+        .btn-primary {
+            font-size: 32px;
+            padding: 15px 50px;
+            background: #ff9f43;
+            color: white;
+            border-radius: 30px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(255, 159, 67, 0.4);
+        }
+
+        .btn-secondary {
+            font-size: 24px;
+            padding: 10px 30px;
+            background: #00d2d3;
+            color: white;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        /* Stage UI */
+        .stage-title {
+            font-size: 40px;
+            color: #576574;
+            position: absolute;
+            top: 20px;
+        }
+
+        /* Stage 2 Problem */
+        .problem-box {
+            font-size: 80px;
+            letter-spacing: 5px;
+            margin-bottom: 40px;
+            color: #222;
+        }
+
+        .choices-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .choice-btn {
+            width: 100px;
+            height: 100px;
+            font-size: 48px;
+            border-radius: 20px;
+            background: #feca57;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Stage 3 Buckets */
+        .s3-word-card {
+            font-size: 72px;
+            padding: 20px 50px;
+            background: white;
+            border: 4px dashed #ff9f43;
+            border-radius: 25px;
+            margin-bottom: 50px;
+        }
+
+        .buckets-container {
+            display: flex;
+            gap: 40px;
+        }
+
+        .bucket {
+            width: 160px;
+            height: 160px;
+            background: #48dbfb;
+            color: white;
+            font-size: 64px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Writing Input */
+        .writing-input {
+            font-size: 64px;
+            text-align: center;
+            width: 400px;
+            padding: 10px;
+            font-family: 'Jua', sans-serif;
+            border: 4px solid #1dd1a1;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Record Overlay */
+        .record-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            display: none;
+        }
+
+        .record-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            color: white;
+            font-size: 48px;
+        }
+
+        .recording-anim {
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.1);
+                box-shadow: 0 0 20px #ff6b6b;
+            }
+        }
+
+        /* Feedback Overlay */
+        .feedback-icon {
+            font-size: 200px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+        }
+
+        .feedback-icon.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        /* Confetti */
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            top: -10px;
+            z-index: 40;
+            animation: fall 3s linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(800px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Report Table */
+        .report-container {
+            width: 80%;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 20px;
+            border: 3px solid #ff9f43;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 2px dashed #eee;
+            font-size: 28px;
+        }
+
+        .report-item:last-child {
+            border-bottom: none;
+        }
+
+        audio.report-audio {
+            height: 40px;
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app-container">
+        <div class="top-bar">
+            <div class="brand">🌱 겹받침 읽고 쓰기</div>
+            <button class="speaker-btn" id="speaker-btn" onclick="toggleSpeaker()">🔈</button>
+        </div>
+
+        <div id="scene-content">
+            <!-- Content Dynamic Injection -->
+        </div>
+
+        <!-- O/X Feedback -->
+        <div id="feedback-o" class="feedback-icon" style="color: #1dd1a1;">⭕</div>
+        <div id="feedback-x" class="feedback-icon" style="color: #ff6b6b;">❌</div>
+
+        <!-- Record Overlays -->
+        <div id="record-overlay" class="record-overlay">
+            <h2 style="font-size: 48px; margin-bottom: 10px;">🎙️ 큰 소리로 읽어보세요!</h2>
+            <div id="record-word" style="font-size: 64px; color: #4facfe; margin-bottom: 30px;">단어</div>
+            <button id="record-btn" class="record-btn" onclick="handleRecordClick()">🎤</button>
+            <div id="record-status" style="font-size: 24px; margin-top: 20px; color: #555;">마이크 버튼을 누르면 녹음이 시작됩니다.</div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================
+           1. Scale Responsive Settings
+           ========================================= */
+        function resizeApp() {
+            const container = document.getElementById('app-container');
+            const scaleX = window.innerWidth / 1280;
+            const scaleY = window.innerHeight / 720;
+            const scale = Math.min(scaleX, scaleY);
+            container.style.transform = `scale(${scale})`;
+        }
+        window.addEventListener('resize', resizeApp);
+        resizeApp();
+
+        /* =========================================
+           2. Global State & Mocks
+           ========================================= */
+        let isSpeakerOn = false;
+        let currentUser = '';
+        let learningHistory = [];
+
+        let appState = {
+            students: ['학생1', '학생2', '학생3'],
+            stage1: [
+                { Image: '🐔', Question: '소리는 [닥]이지만 쓸 때는?', SoundText: '꼬끼오~ 닭', Option1: '닥', Option2: '닭', Answer: '닭', Concept: 'ㄹㄱ 받침', Feedback: '딩동댕! 소리는 [닥]이지만 쓸 때는 \'ㄹㄱ\' 받침을 써야 해.' },
+                { Image: '🪑', Question: '의자에 편안하게 [안따].', SoundText: '의자에 앉다', Option1: '앉다', Option2: '안다', Answer: '앉다', Concept: 'ㄴㅈ 받침', Feedback: '맞아! \'안다\'는 친구를 안아줄 때 쓰고, 의자에는 \'앉다\'를 써.' },
+                { Image: '8️⃣', Question: '숫자 8은 어떻게 쓸까요?', SoundText: '여덟', Option1: '여덟', Option2: '여덜', Answer: '여덟', Concept: 'ㄹㅂ 받침', Feedback: '참 잘했어! 소리는 [여덜]이지만 \'ㄹㅂ\' 받침이 있는 \'여덟\'이야.' },
+                { Image: '🏷️', Question: '물건의 [갑]을 물어봐요.', SoundText: '얼마예요? 값', Option1: '갑', Option2: '값', Answer: '값', Concept: 'ㅂㅅ 받침', Feedback: '훌륭해! 물건의 가격을 뜻할 때는 \'값\'이라고 써.' }
+            ],
+            stage2: [
+                { Image: '🐔', Question: '소리는 [닥]이지만 쓸 때는?', Word: '닭', Target: '다_', Choices: ['ㄱ', 'ㄹㄱ', 'ㄴㅈ', 'ㄹㅂ'], Answer: 'ㄹㄱ' },
+                { Image: '🪑', Question: '의자에 편안하게 [안따].', Word: '앉다', Target: '아_ 다', Choices: ['ㄴ', 'ㄴㅈ', 'ㄹㅂ', 'ㄱㅅ'], Answer: 'ㄴㅈ' },
+                { Image: '8️⃣', Question: '숫자 8은 어떻게 쓸까요?', Word: '여덟', Target: '여 더_', Choices: ['ㄹ', 'ㄹㅂ', 'ㄹㅌ', 'ㄹㅁ'], Answer: 'ㄹㅂ' },
+                { Image: '🏞️', Question: '운동장이 아주 [널따].', Word: '넓다', Target: '너_ 다', Choices: ['ㅂ', 'ㄹㅂ', 'ㄹㅁ', 'ㄴㅈ'], Answer: 'ㄹㅂ' }
+            ],
+            stage3: [
+                { Word: '맑다', Option1: '[막따]', Option2: '[말따]', Answer: '[막따]' },
+                { Word: '앉다', Option1: '[안자]', Option2: '[안따]', Answer: '[안따]' },
+                { Word: '여덟', Option1: '[여덜]', Option2: '[여덥]', Answer: '[여덜]' }
+            ]
+        };
+
+        let currentStage = 0; // 2, 3 (concept), 4 (writing)
+        let currentIndex = 0;
+
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioBlob = null;
+        let audioBase64 = '';
+        let micInitialized = false;
+
+        const contentDiv = document.getElementById('scene-content');
+
+        /* =========================================
+           3. Audio & Mic Setup
+           ========================================= */
+        function toggleSpeaker() {
+            isSpeakerOn = !isSpeakerOn;
+            document.getElementById('speaker-btn').textContent = isSpeakerOn ? '🔊' : '🔈';
+            if (isSpeakerOn) playTTS("소리가 켜졌습니다.");
+        }
+
+        function playTTS(text) {
+            if (!isSpeakerOn) return;
+            const ut = new SpeechSynthesisUtterance(text);
+            ut.lang = 'ko-KR';
+            speechSynthesis.speak(ut);
+        }
+
+        function playSound(type) {
+            if (!isSpeakerOn) return;
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                osc.connect(audioCtx.destination);
+                if (type === 'correct') {
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+                } else {
+                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+                }
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            } catch (e) { }
+        }
+
+        async function requestMic() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+
+                const micBtn = document.getElementById('init-mic-btn');
+                micBtn.textContent = '✅ 마이크 준비 완료';
+                micBtn.style.background = '#1dd1a1';
+                micBtn.disabled = true;
+                micInitialized = true;
+                playTTS("마이크가 연결되었습니다.");
+            } catch (e) {
+                alert("마이크 사용 권한을 허용해주셔야 학습녹음이 가능합니다.");
+                console.warn("Mic auth failed:", e);
+            }
+        }
+
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxlDiABM19D8ObofOYwYmUuOOFJql5GNY48h3cAoY0wm-0TUGl5lJBiGUPVRBlP_z9lLw/exec'; // ★ 여기에 배포 후 발급받은 구글 앱스 스크립트 웹앱 주소(URL)를 복사해서 작은 따옴표 안에 넣으세요.
+
+        /* =========================================
+           4. App Initialization (GAS Fetch)
+           ========================================= */
+        window.onload = () => {
+            contentDiv.innerHTML = `<h2 class="intro-title" style="color:#555;">데이터를 불러오는 중...</h2>`;
+            if (GAS_URL && GAS_URL.startsWith('http')) {
+                fetch(GAS_URL)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            appState.students = data.students || appState.students;
+                            appState.stage1 = data.stage1 && data.stage1.length > 0 ? data.stage1 : appState.stage1;
+                            appState.stage2 = data.stage2 && data.stage2.length > 0 ? data.stage2 : appState.stage2;
+                            appState.stage3 = data.stage3 && data.stage3.length > 0 ? data.stage3 : appState.stage3;
+                        }
+                        renderIntro();
+                    })
+                    .catch(err => {
+                        console.error('Fetch Error:', err);
+                        renderIntro(); // Fallback setup
+                    });
+            } else {
+                setTimeout(renderIntro, 500); // Simulate network if GAS_URL is empty
+            }
+        };
+
+        function renderIntro() {
+            let options = appState.students.map(s => `<option value="${s}">${s}</option>`).join('');
+            contentDiv.innerHTML = `
+      <h1 class="intro-title">🎉 겹받침 읽고 쓰기 🎉</h1>
+      <select id="student-select" class="intro-select">
+        ${options}
+      </select>
+      <br><br>
+      <button class="btn-secondary" id="init-mic-btn" onclick="requestMic()">🎤 마이크 설정하기</button>
+      <br>
+      <button class="btn-primary" style="background:#1dd1a1;" onclick="startGame(1)">▶️ 1단계 시작하기</button>
+      <button class="btn-primary" onclick="startGame(2)">▶️ 2단계 시작하기</button>
+      <button class="btn-primary" style="background:#48dbfb;" onclick="startGame(3)">▶️ 3단계 시작하기</button>
+    `;
+        }
+
+        function startGame(stage) {
+            currentUser = document.getElementById('student-select').value;
+            learningHistory = [];
+            if (!micInitialized) {
+                alert("원활한 진행을 위해 [마이크 설정하기] 버튼을 먼저 눌러 허용해주세요.");
+                // Soft-enforcement, don't hard block just in case of environment issue
+            }
+            currentIndex = 0;
+            currentStage = stage;
+            if (stage === 1) renderStage1();
+            if (stage === 2) renderStage2();
+            if (stage === 3) renderStage3Concept(); // 3-1 Concept
+        }
+
+        /* =========================================
+           5. Feedback & Logging
+           ========================================= */
+        function showFeedbackOverlay(isCorrect, callback) {
+            const el = isCorrect ? document.getElementById('feedback-o') : document.getElementById('feedback-x');
+            el.classList.add('show');
+            playSound(isCorrect ? 'correct' : 'wrong');
+            setTimeout(() => {
+                el.classList.remove('show');
+                if (callback) callback();
+            }, 1000);
+        }
+
+        function logResult(wordPlayed, actionDesc, isCorrect, nextCallback) {
+            // Save locally
+            learningHistory.push({
+                word: wordPlayed,
+                action: actionDesc,
+                audioBlob: audioBlob
+            });
+            console.log(`[LOG] ${currentUser} | Stage ${currentStage} | ${actionDesc} | Correct:${isCorrect}`);
+
+            // Prepare Data
+            const payload = {
+                student: currentUser, stage: currentStage, action: actionDesc,
+                isCorrect: isCorrect ? 'O' : 'X', audioBase64: audioBase64, audioType: 'audio/webm'
+            };
+
+            if (GAS_URL && GAS_URL.startsWith('http')) {
+                fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                })
+                    .then(res => res.json())
+                    .then(data => { console.log('Saved to Sheet:', data); nextCallback(); })
+                    .catch(err => { console.error('Save failed:', err); nextCallback(); });
+            } else {
+                setTimeout(nextCallback, 300); // Mock delay
+            }
+        }
+
+        /* =========================================
+           5.5 Stage 1 Logic
+           ========================================= */
+        function renderStage1() {
+            if (currentIndex >= appState.stage1.length) {
+                currentStage = 2;
+                currentIndex = 0;
+                renderStage2();
+                return;
+            }
+            const problem = appState.stage1[currentIndex];
+            playTTS(`${currentIndex + 1}번째 문제. ${problem.Question}`);
+
+            contentDiv.innerHTML = `
+      <div class="stage-title">1단계: 겹받침 읽고 쓰기 (${currentIndex + 1}/${appState.stage1.length})</div>
+      <div style="font-size:120px; text-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom:20px;">${problem.Image}</div>
+      <div style="background:#fff; padding:30px; border-radius:30px; border:3px solid #ff9f43; margin-bottom:40px;">
+        <h2 style="font-size:40px; margin:0 0 20px 0; color:#2c3e50;">${problem.Question}</h2>
+        <button style="font-size:24px; padding:10px 20px; background:#f1f2f6; border-radius:15px; color:#3742fa; box-shadow:0 3px 5px rgba(0,0,0,0.1);" onclick="playTTS('${problem.SoundText}')">🔊 소리 듣기</button>
+      </div>
+      <div class="choices-container">
+        <button style="width:200px; height:120px; font-size:64px; border-radius:25px; background:#4facfe; color:white; box-shadow:0 5px 15px rgba(0,0,0,0.1);" onclick="checkStage1('${problem.Option1}')">${problem.Option1}</button>
+        <button style="width:200px; height:120px; font-size:64px; border-radius:25px; background:#4facfe; color:white; box-shadow:0 5px 15px rgba(0,0,0,0.1);" onclick="checkStage1('${problem.Option2}')">${problem.Option2}</button>
+      </div>
+    `;
+        }
+
+        function checkStage1(selectedAns) {
+            const problem = appState.stage1[currentIndex];
+            const isCorrect = (selectedAns === problem.Answer);
+            if (!isCorrect) {
+                showFeedbackOverlay(false);
+                playTTS("저런, 다시 한 번 생각해볼까요?");
+                return;
+            }
+            showFeedbackOverlay(true, () => {
+                openRecordOverlay(problem.Answer, () => {
+                    logResult(problem.Answer, `Stage1: ${problem.Question}, Chosen: ${selectedAns}`, true, () => {
+                        currentIndex++;
+                        renderStage1();
+                    });
+                }, `정답입니다! ${problem.Feedback}`);
+            });
+        }
+
+        function formatKoreanBlank(targetStr) {
+            if (!targetStr) return '';
+            return targetStr.replace(/([가-힣])_/g, `<div style="display:inline-flex; flex-direction:column; justify-content:center; align-items:center; vertical-align:top; line-height:1; position:relative; top:5px; margin: 0 5px;">
+        <span style="font-size:1em; margin-bottom:5px; letter-spacing:0;">$1</span>
+        <span style="width:0.8em; height:0.8em; border:6px dashed #ff9f43; border-radius:12px; background-color:#fff9f0; display:inline-block;"></span>
+      </div>`);
+        }
+
+        /* =========================================
+           6. Stage 2 Logic (Fill the blank)
+           ========================================= */
+        function renderStage2() {
+            if (currentIndex >= appState.stage2.length) {
+                currentStage = 3;
+                currentIndex = 0;
+                renderStage3Concept();
+                return;
+            }
+            const problem = appState.stage2[currentIndex];
+
+            // Fallback UI text if problem comes from old array format
+            let imgHTML = problem.Image ? `<div style="font-size:100px; text-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom:10px;">${problem.Image}</div>` : '';
+            let qHTML = problem.Question ? `<div style="background:#fff; padding:15px 30px; border-radius:20px; border:3px solid #1dd1a1; margin-bottom:20px;"><h2 style="font-size:32px; margin:0; color:#2c3e50;">${problem.Question}</h2></div>` : '';
+            let voicePrompt = problem.Question ? `${currentIndex + 1}번째 문제. ${problem.Question} 알맞은 받침을 골라보세요.` : '알맞은 받침을 골라보세요.';
+            playTTS(voicePrompt);
+
+            // Generate Choices
+            let choiceHTML = '';
+            problem.Choices.forEach(c => {
+                choiceHTML += `<button class="choice-btn" onclick="checkStage2('${c}')">${c}</button>`;
+            });
+
+            contentDiv.innerHTML = `
+      <div class="stage-title">2단계: 받침 고르기 (${currentIndex + 1}/${appState.stage2.length})</div>
+      ${imgHTML}
+      ${qHTML}
+      <div class="problem-box" style="display:flex; justify-content:center; align-items:flex-end; gap:10px; margin: 30px 0;">${formatKoreanBlank(problem.Target)}</div>
+      <div class="choices-container" style="justify-content:center; gap:20px;">
+        ${choiceHTML}
+      </div>
+    `;
+        }
+
+        function checkStage2(selectedChar) {
+            const problem = appState.stage2[currentIndex];
+            const isCorrect = (selectedChar === problem.Answer);
+            if (!isCorrect) {
+                showFeedbackOverlay(false);
+                playTTS("다시 한 번 생각해볼까요?");
+                return;
+            }
+            // Correct! Show the completed word
+            document.querySelector('.problem-box').innerHTML = problem.Word;
+            document.querySelector('.problem-box').style.color = '#1dd1a1';
+            showFeedbackOverlay(true, () => {
+                openRecordOverlay(problem.Word, () => {
+                    logResult(problem.Word, `Word: ${problem.Word}, Chosen: ${selectedChar}`, true, () => {
+                        currentIndex++;
+                        renderStage2();
+                    });
+                });
+            });
+        }
+
+        /* =========================================
+           7. Stage 3 Logic (Concept -> Writing)
+           ========================================= */
+        function renderStage3Concept() {
+            if (currentIndex >= appState.stage3.length) {
+                renderCompletion();
+                return;
+            }
+            const problem = appState.stage3[currentIndex];
+            playTTS(`${problem.Word}. 알맞은 발음을 선택하세요.`);
+
+            contentDiv.innerHTML = `
+      <div class="stage-title">3단계: 올바른 발음 고르기 (${currentIndex + 1}/${appState.stage3.length})</div>
+      <div class="s3-word-card">${problem.Word}</div>
+      <div class="choices-container">
+        <button style="width:250px; height:120px; font-size:64px; border-radius:25px; background:#ff9f43; color:white; box-shadow:0 5px 15px rgba(0,0,0,0.1);" onclick="checkStage3Concept('${problem.Option1}')">${problem.Option1}</button>
+        <button style="width:250px; height:120px; font-size:64px; border-radius:25px; background:#4facfe; color:white; box-shadow:0 5px 15px rgba(0,0,0,0.1);" onclick="checkStage3Concept('${problem.Option2}')">${problem.Option2}</button>
+      </div>
+    `;
+        }
+
+        function checkStage3Concept(selectedAns) {
+            const problem = appState.stage3[currentIndex];
+            const isCorrect = (selectedAns === problem.Answer);
+            if (!isCorrect) {
+                showFeedbackOverlay(false);
+                playTTS("이 단어의 발음을 다시 생각해봐요.");
+                return;
+            }
+            showFeedbackOverlay(true, () => {
+                openRecordOverlay(problem.Word, () => {
+                    logResult(problem.Word, `Pronunciation: ${problem.Word}, Picked: ${selectedAns}`, true, () => {
+                        currentIndex++;
+                        renderStage3Concept();
+                    });
+                }, "발음을 정확히 맞췄어요!");
+            });
+        }
+
+
+
+        /* =========================================
+           8. Audio Recording Overlay UI
+           ========================================= */
+        let recordState = 0; // 0: Idle, 1: Recording
+        let finishRecordCallback = null;
+
+        function openRecordOverlay(wordToRead, callback, prefixMsg = '') {
+            finishRecordCallback = callback;
+            audioBase64 = '';
+            audioChunks = [];
+            recordState = 0;
+
+            if (!mediaRecorder) {
+                // No Mic -> Skip recording
+                finishRecordCallback();
+                return;
+            }
+
+            const overlay = document.getElementById('record-overlay');
+            document.getElementById('record-word').textContent = wordToRead;
+
+            const btn = document.getElementById('record-btn');
+            btn.textContent = '🎤';
+            btn.classList.remove('recording-anim');
+            document.getElementById('record-status').textContent = '마이크 버튼을 누르면 녹음이 시작됩니다.';
+
+            overlay.style.display = 'flex';
+            if (prefixMsg) {
+                playTTS(`${prefixMsg} 이제 큰 소리로 읽고 마이크 버튼을 눌러주세요.`);
+            } else {
+                playTTS(`${wordToRead}. 큰 소리로 읽고 마이크 버튼을 눌러주세요.`);
+            }
+        }
+
+        window.handleRecordClick = function () {
+            const btn = document.getElementById('record-btn');
+            const status = document.getElementById('record-status');
+
+            if (recordState === 0) {
+                // Start Recording
+                try {
+                    if (mediaRecorder.state !== 'recording') mediaRecorder.start();
+                    recordState = 1;
+                    btn.textContent = '⏹️';
+                    btn.classList.add('recording-anim');
+                    status.textContent = '녹음 중... 다 읽으면 정지 버튼을 누르세요.';
+                } catch (e) { console.error(e); }
+            } else {
+                // Stop Recording
+                recordState = 2;
+                btn.textContent = '⏳';
+                btn.classList.remove('recording-anim');
+                status.textContent = '처리 중입니다...';
+
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    reader.onloadend = () => {
+                        const b64 = reader.result.split(',')[1];
+                        audioBase64 = b64 || '';
+                        document.getElementById('record-overlay').style.display = 'none';
+                        if (finishRecordCallback) finishRecordCallback();
+                    };
+                };
+                if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+            }
+        }
+
+        /* =========================================
+           9. Completion
+           ========================================= */
+        function renderCompletion() {
+            playTTS("모든 학습을 마쳤습니다. 대단해요!");
+
+            // Confetti effect
+            for (let i = 0; i < 100; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.left = Math.random() * 100 + '%';
+                conf.style.animationDelay = (Math.random() * 2) + 's';
+                conf.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                document.getElementById('app-container').appendChild(conf);
+            }
+
+            let reportRows = '';
+            learningHistory.forEach((item, i) => {
+                let audioHtml = '<span>녹음 없음</span>';
+                if (item.audioBlob && item.audioBlob.size > 0) {
+                    const audioUrl = URL.createObjectURL(item.audioBlob);
+                    audioHtml = `<audio class="report-audio" controls src="${audioUrl}"></audio>`;
+                }
+                reportRows += `
+        <div class="report-item">
+          <div><strong style="color:#576574;">${i + 1}. ${item.word}</strong> <span style="color:#1dd1a1; margin-left:15px; font-weight:bold;">O</span></div>
+          <div>${audioHtml}</div>
+        </div>
+      `;
+            });
+
+            contentDiv.innerHTML = `
+      <h1 style="font-size:50px; color:#4facfe; margin-bottom:10px;">배움 기록표</h1>
+      <div class="report-container">
+        ${reportRows.length ? reportRows : '<div style="text-align:center; padding: 20px;">기록이 없습니다.</div>'}
+      </div>
+      <button class="btn-primary" onclick="renderIntro()">처음으로 돌아가기</button>
+    `;
+        }
+    </script>
+</body>
+
+</html>
