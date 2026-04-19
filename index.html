@@ -395,7 +395,9 @@
 
         function playTTS(text) {
             if (!isSpeakerOn) return;
-            const ut = new SpeechSynthesisUtterance(text);
+            // 괄호 [ ] 기호를 기계가 '대괄호'라고 읽는 오작동을 방지하기 위해 텍스트 정제
+            let cleanText = text.replace(/\[/g, '').replace(/\]/g, '');
+            const ut = new SpeechSynthesisUtterance(cleanText);
             ut.lang = 'ko-KR';
             speechSynthesis.speak(ut);
         }
@@ -717,7 +719,9 @@
                 return;
             }
             const problem = appState.stage3[currentIndex];
-            playTTS(`${problem.Word}. 알맞은 발음을 선택하세요.`);
+            // '값', '닭' 같이 기계가 단독으로 발음하기 어려워하는 글자 대신, 정답으로 내장된 [갑], [닥] (실제 발음)을 TTS에 넘겨주어 정확한 소리를 들려줌
+            const phonetic = problem.Answer.replace(/\[|\]/g, ''); 
+            playTTS(`${phonetic}. 알맞은 발음을 선택하세요.`);
 
             contentDiv.innerHTML = `
       <div class="stage-title">3단계: 올바른 발음 고르기 (${currentIndex + 1}/${appState.stage3.length})</div>
