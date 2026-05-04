@@ -1,914 +1,1412 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>겹받침 읽고 쓰기</title>
-    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* Reset & Base */
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            /* No scrollbars! */
-            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-            font-family: 'Jua', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #333;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>겹받침 읽고 쓰기</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ================================
+   Reset & Base
+   ================================ */
+*{box-sizing:border-box;}
+html,body{
+  margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;
+  background:linear-gradient(135deg,#a1c4fd 0%,#c2e9fb 100%);
+  font-family:'Jua',sans-serif;
+  display:flex;justify-content:center;align-items:center;color:#333;
+}
 
-        /* Scale Container */
-        #app-container {
-            width: 1280px;
-            height: 720px;
-            /* transform-origin: center center; handled in JS */
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+/* ================================
+   Scale Container (1280x800 base)
+   ================================ */
+#app-container{
+  width:1280px;height:800px;
+  background:rgba(255,255,255,0.95);
+  border-radius:30px;
+  box-shadow:0 15px 35px rgba(0,0,0,0.2);
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+}
 
-        /* UI Globals */
-        button {
-            font-family: 'Jua', sans-serif;
-            cursor: pointer;
-            border: none;
-            outline: none;
-            transition: transform 0.1s, filter 0.2s;
-        }
+/* ================================
+   Common UI
+   ================================ */
+button{
+  font-family:'Jua',sans-serif;cursor:pointer;border:none;outline:none;
+  transition:transform 0.1s,filter 0.2s;
+}
+button:active{transform:scale(0.95);}
+button:hover{filter:brightness(1.05);}
+button:disabled{cursor:not-allowed;opacity:0.6;}
 
-        button:active {
-            transform: scale(0.95);
-        }
+/* Top Bar */
+.top-bar{
+  height:80px;display:flex;justify-content:space-between;align-items:center;
+  padding:0 30px;background:rgba(255,255,255,0.9);
+  border-bottom:3px solid #e1e1e1;z-index:10;
+}
+.brand{font-size:32px;color:#4facfe;font-weight:bold;}
+.top-bar-right{display:flex;gap:15px;align-items:center;}
+.top-bar-info{
+  font-size:22px;color:#576574;
+  background:#f1f2f6;padding:8px 18px;border-radius:20px;
+}
+.speaker-btn{
+  font-size:36px;background:none;box-shadow:none;
+  width:60px;height:60px;border-radius:50%;
+  display:flex;justify-content:center;align-items:center;
+}
+.speaker-btn.on{background:#feca57;}
 
-        button:hover {
-            filter: brightness(1.05);
-        }
+/* Scene Area */
+#scene-content{
+  flex:1;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  position:relative;padding:30px;overflow:hidden;
+}
 
-        /* Top Bar */
-        .top-bar {
-            height: 70px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
-            background: rgba(255, 255, 255, 0.8);
-            border-bottom: 2px solid #e1e1e1;
-            z-index: 10;
-        }
+/* Stage Title */
+.stage-title{
+  font-size:36px;color:#576574;
+  position:absolute;top:20px;left:50%;transform:translateX(-50%);
+  background:white;padding:8px 25px;border-radius:25px;
+  border:3px solid #4facfe;
+}
 
-        .brand {
-            font-size: 28px;
-            color: #4facfe;
-        }
+/* Buttons */
+.btn-primary{
+  font-size:36px;padding:18px 55px;background:#ff9f43;color:white;
+  border-radius:30px;margin-top:20px;
+  box-shadow:0 6px 18px rgba(255,159,67,0.4);
+}
+.btn-secondary{
+  font-size:26px;padding:12px 32px;background:#00d2d3;color:white;
+  border-radius:22px;margin-top:10px;
+}
+.btn-help{
+  font-size:24px;padding:12px 24px;background:#feca57;color:#222;
+  border-radius:18px;display:inline-flex;align-items:center;gap:8px;
+  box-shadow:0 4px 10px rgba(254,202,87,0.4);
+}
 
-        .speaker-btn {
-            font-size: 32px;
-            background: none;
-            box-shadow: none;
-        }
+/* Intro */
+.intro-title{
+  font-size:68px;color:#ff6b6b;margin-bottom:20px;text-align:center;
+  text-shadow:3px 3px 0 #fff;
+}
+.intro-select{
+  font-size:28px;padding:12px 24px;font-family:'Jua',sans-serif;
+  border-radius:18px;border:3px solid #4facfe;background:white;
+  text-align:center;min-width:280px;
+}
 
-        /* Scene Area */
-        #scene-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            padding: 20px;
-        }
+/* Stage shared */
+.problem-card{
+  background:white;padding:25px 40px;border-radius:25px;
+  border:3px solid #ff9f43;margin-bottom:25px;text-align:center;
+  box-shadow:0 6px 15px rgba(0,0,0,0.08);
+  max-width:1100px;
+}
+.problem-image{
+  font-size:110px;text-shadow:0 8px 16px rgba(0,0,0,0.1);
+  margin-bottom:10px;line-height:1;
+}
+.problem-question{font-size:38px;margin:0 0 15px 0;color:#2c3e50;}
+.problem-sound-btn{
+  font-size:24px;padding:10px 22px;background:#f1f2f6;
+  border-radius:18px;color:#3742fa;
+  box-shadow:0 3px 6px rgba(0,0,0,0.1);
+}
 
-        /* Loading / Intro */
-        .intro-title {
-            font-size: 64px;
-            color: #ff6b6b;
-            margin-bottom: 20px;
-        }
+/* Choices */
+.choices-container{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+.choice-btn{
+  min-width:180px;height:120px;padding:0 30px;font-size:60px;
+  border-radius:25px;background:#4facfe;color:white;
+  box-shadow:0 6px 15px rgba(0,0,0,0.12);
+}
+.choice-btn.batchim{
+  min-width:120px;width:120px;height:120px;font-size:48px;
+  background:#feca57;color:#fff;
+}
+.choice-btn.pron{background:#ff9f43;font-size:54px;min-width:240px;}
+.choice-btn.pron-alt{background:#4facfe;font-size:54px;min-width:240px;}
 
-        .intro-select {
-            font-size: 24px;
-            padding: 10px 20px;
-            font-family: 'Jua', sans-serif;
-            border-radius: 15px;
-            border: 2px solid #ddd;
-        }
+/* Stage 2 (Writing) target */
+.problem-box{
+  font-size:88px;letter-spacing:6px;margin:30px 0;color:#222;
+  display:flex;justify-content:center;align-items:flex-end;gap:10px;
+}
+.batchim-blank{
+  display:inline-flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  vertical-align:top;line-height:1;position:relative;top:5px;margin:0 5px;
+}
+.batchim-blank .top{font-size:1em;margin-bottom:8px;letter-spacing:0;}
+.batchim-blank .blank{
+  width:0.85em;height:0.85em;border:6px dashed #ff9f43;
+  border-radius:14px;background:#fff9f0;
+}
 
-        .btn-primary {
-            font-size: 32px;
-            padding: 15px 50px;
-            background: #ff9f43;
-            color: white;
-            border-radius: 30px;
-            margin-top: 20px;
-            box-shadow: 0 5px 15px rgba(255, 159, 67, 0.4);
-        }
+/* Stage 4 word card */
+.s4-word-card{
+  font-size:86px;padding:25px 60px;background:white;
+  border:5px dashed #ff9f43;border-radius:30px;margin-bottom:35px;
+}
 
-        .btn-secondary {
-            font-size: 24px;
-            padding: 10px 30px;
-            background: #00d2d3;
-            color: white;
-            border-radius: 20px;
-            margin-top: 10px;
-        }
+/* Tutorial bubble */
+.tutorial-bubble{
+  display:inline-block;background:#fff3cd;color:#e15f41;
+  padding:10px 22px;border-radius:18px;font-size:22px;
+  margin-top:15px;box-shadow:0 4px 10px rgba(0,0,0,0.06);
+  border:2px dashed #ff9f43;
+}
 
-        /* Stage UI */
-        .stage-title {
-            font-size: 40px;
-            color: #576574;
-            position: absolute;
-            top: 20px;
-        }
+/* O/X Feedback */
+.feedback-icon{
+  font-size:240px;position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.5);
+  z-index:80;opacity:0;pointer-events:none;transition:0.3s;
+}
+.feedback-icon.show{opacity:1;transform:translate(-50%,-50%) scale(1.2);}
 
-        /* Stage 2 Problem */
-        .problem-box {
-            font-size: 80px;
-            letter-spacing: 5px;
-            margin-bottom: 40px;
-            color: #222;
-        }
+/* Confetti / sticker rain */
+.confetti{
+  position:absolute;width:18px;height:18px;top:-20px;
+  z-index:60;animation:fall 3s linear forwards;
+  font-size:32px;line-height:1;
+}
+@keyframes fall{
+  to{transform:translateY(900px) rotate(720deg);opacity:0;}
+}
 
-        .choices-container {
-            display: flex;
-            gap: 20px;
-        }
+/* Reward popup (small floating sticker) */
+.reward-pop{
+  position:absolute;font-size:80px;z-index:70;
+  animation:reward-anim 1.4s ease-out forwards;pointer-events:none;
+}
+@keyframes reward-anim{
+  0%{transform:translate(-50%,-50%) scale(0);opacity:0;}
+  30%{transform:translate(-50%,-50%) scale(1.3);opacity:1;}
+  100%{transform:translate(-50%,-200%) scale(0.8);opacity:0;}
+}
 
-        .choice-btn {
-            width: 100px;
-            height: 100px;
-            font-size: 48px;
-            border-radius: 20px;
-            background: #feca57;
-            color: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
+/* ================================
+   Record Overlay
+   ================================ */
+.record-overlay{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  background:rgba(255,255,255,0.97);
+  display:none;flex-direction:column;justify-content:center;align-items:center;
+  z-index:50;padding:30px;
+}
+.record-overlay.show{display:flex;}
+.record-title{font-size:42px;margin-bottom:10px;color:#2c3e50;text-align:center;}
+.record-word-card{
+  background:white;border:5px solid #4facfe;border-radius:25px;
+  padding:25px 60px;font-size:80px;color:#4facfe;margin-bottom:20px;
+  box-shadow:0 8px 20px rgba(79,172,254,0.25);
+  min-width:300px;text-align:center;
+  /* whiteCard never gets cut */
+  max-width:90%;
+}
+.record-buttons-row{
+  display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center;
+}
+.record-btn{
+  width:130px;height:130px;border-radius:50%;background:#ff6b6b;color:white;
+  font-size:56px;
+  box-shadow:0 8px 20px rgba(255,107,107,0.4);
+}
+.record-btn:disabled{background:#aaa;}
+.recording-anim{animation:pulse 1s infinite alternate;}
+@keyframes pulse{
+  from{transform:scale(1);}
+  to{transform:scale(1.1);box-shadow:0 0 30px #ff6b6b;}
+}
+.kb-toggle-btn{
+  font-size:22px;padding:12px 22px;background:#48dbfb;color:white;
+  border-radius:18px;
+}
+.help-btn-record{
+  font-size:22px;padding:12px 22px;background:#feca57;color:#222;
+  border-radius:18px;
+}
+.record-tutorial{
+  font-size:22px;line-height:1.4;margin-top:18px;color:#e15f41;
+  background:#fff3cd;padding:12px 22px;border-radius:18px;
+  text-align:center;box-shadow:0 4px 10px rgba(0,0,0,0.06);
+  display:none;
+}
+.record-tutorial.show{display:block;}
+.record-status{
+  font-size:26px;margin-top:18px;color:#555;
+  min-height:50px;text-align:center;
+}
+.stt-preview{
+  background:#fff;padding:8px 20px;border-radius:18px;
+  box-shadow:0 3px 6px rgba(0,0,0,0.1);
+  color:#00d2d3;font-size:32px;font-weight:bold;
+}
+.kb-input-area{
+  display:none;margin-top:15px;flex-direction:column;align-items:center;gap:10px;
+}
+.kb-input-area.show{display:flex;}
+.kb-input-area input{
+  font-size:42px;padding:10px 18px;font-family:'Jua',sans-serif;
+  border:3px solid #1dd1a1;border-radius:18px;text-align:center;width:340px;
+}
+.kb-input-area button{
+  font-size:24px;padding:10px 24px;background:#1dd1a1;color:white;border-radius:18px;
+}
 
-        /* Stage 3 Buckets */
-        .s3-word-card {
-            font-size: 72px;
-            padding: 20px 50px;
-            background: white;
-            border: 4px dashed #ff9f43;
-            border-radius: 25px;
-            margin-bottom: 50px;
-        }
+/* Self-eval Overlay */
+.eval-overlay{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  background:rgba(255,255,255,0.97);
+  display:none;flex-direction:column;justify-content:center;align-items:center;
+  z-index:55;padding:30px;
+}
+.eval-overlay.show{display:flex;}
+.eval-title{font-size:42px;color:#ff6b6b;margin-bottom:8px;text-align:center;}
+.eval-subtitle{font-size:24px;color:#576574;margin-bottom:20px;text-align:center;}
+.eval-playback-btn{
+  font-size:30px;padding:15px 35px;background:#4facfe;color:white;
+  border-radius:25px;margin-bottom:25px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 6px 15px rgba(79,172,254,0.4);
+}
+.stars-row{display:flex;gap:12px;margin-bottom:10px;}
+.star-btn{
+  font-size:64px;background:none;color:#ddd;
+  transition:color 0.15s,transform 0.15s;line-height:1;padding:0;
+}
+.star-btn.active{color:#feca57;text-shadow:0 0 12px rgba(254,202,87,0.6);}
+.eval-text{font-size:26px;color:#555;margin:10px 0 20px 0;min-height:36px;}
+.eval-actions{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;}
+.eval-actions button{
+  font-size:26px;padding:14px 32px;border-radius:22px;
+}
+.btn-redo{background:#ff6b6b;color:white;}
+.btn-next{background:#1dd1a1;color:white;}
+.eval-warn{
+  font-size:22px;color:#e15f41;background:#fff3cd;
+  padding:10px 18px;border-radius:14px;margin-top:10px;
+  display:none;
+}
+.eval-warn.show{display:block;}
 
-        .buckets-container {
-            display: flex;
-            gap: 40px;
-        }
+/* Help Overlay */
+.help-overlay{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.5);
+  display:none;justify-content:center;align-items:center;z-index:90;padding:30px;
+}
+.help-overlay.show{display:flex;}
+.help-card{
+  background:white;border-radius:25px;padding:35px 45px;max-width:780px;
+  text-align:center;box-shadow:0 15px 30px rgba(0,0,0,0.3);
+}
+.help-card h2{font-size:36px;color:#ff6b6b;margin:0 0 15px;}
+.help-examples{
+  display:flex;flex-direction:column;gap:12px;margin:15px 0 20px;
+}
+.help-ex-row{
+  display:flex;justify-content:space-between;align-items:center;
+  background:#f1f2f6;border-radius:18px;padding:12px 20px;
+}
+.help-ex-row span{font-size:28px;color:#2c3e50;}
+.help-ex-row button{
+  font-size:22px;padding:8px 20px;background:#4facfe;color:white;border-radius:14px;
+}
+.help-close-btn{
+  font-size:26px;padding:12px 30px;background:#576574;color:white;border-radius:20px;
+}
 
-        .bucket {
-            width: 160px;
-            height: 160px;
-            background: #48dbfb;
-            color: white;
-            font-size: 64px;
-            border-radius: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+/* Reflection Overlay */
+.reflection-overlay{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  background:rgba(255,255,255,0.98);
+  display:none;flex-direction:column;justify-content:center;align-items:center;
+  z-index:60;padding:30px;
+}
+.reflection-overlay.show{display:flex;}
+.reflection-title{font-size:48px;color:#4facfe;margin-bottom:18px;}
+.reflection-q{
+  font-size:28px;color:#2c3e50;margin:8px 0;text-align:center;
+  background:#f1f2f6;padding:12px 24px;border-radius:18px;width:80%;
+}
+.reflection-options{
+  display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin:8px 0 18px;
+}
+.reflection-options button{
+  font-size:22px;padding:10px 22px;background:white;color:#576574;
+  border-radius:16px;border:2px solid #ddd;
+}
+.reflection-options button.selected{
+  background:#1dd1a1;color:white;border-color:#1dd1a1;
+}
 
-        /* Writing Input */
-        .writing-input {
-            font-size: 64px;
-            text-align: center;
-            width: 400px;
-            padding: 10px;
-            font-family: 'Jua', sans-serif;
-            border: 4px solid #1dd1a1;
-            border-radius: 20px;
-            margin-bottom: 30px;
-        }
+/* Report */
+.report-container{
+  width:88%;max-height:480px;overflow-y:auto;
+  background:white;border-radius:22px;border:3px solid #ff9f43;
+  padding:18px 22px;box-shadow:0 10px 22px rgba(0,0,0,0.08);
+  margin-bottom:18px;
+}
+.report-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 8px;border-bottom:2px dashed #eee;font-size:24px;flex-wrap:wrap;gap:10px;
+}
+.report-item:last-child{border-bottom:none;}
+.report-stars{color:#feca57;font-size:24px;}
+audio.report-audio{height:40px;outline:none;max-width:260px;}
 
-        /* Record Overlay */
-        .record-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 20;
-            display: none;
-        }
-
-        .record-btn {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: #ff6b6b;
-            color: white;
-            font-size: 48px;
-        }
-
-        .recording-anim {
-            animation: pulse 1s infinite alternate;
-        }
-
-        @keyframes pulse {
-            from {
-                transform: scale(1);
-            }
-
-            to {
-                transform: scale(1.1);
-                box-shadow: 0 0 20px #ff6b6b;
-            }
-        }
-
-        /* Feedback Overlay */
-        .feedback-icon {
-            font-size: 200px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.5);
-            z-index: 50;
-            opacity: 0;
-            pointer-events: none;
-            transition: 0.3s;
-        }
-
-        .feedback-icon.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1.2);
-        }
-
-        /* Confetti */
-        .confetti {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            top: -10px;
-            z-index: 40;
-            animation: fall 3s linear forwards;
-        }
-
-        @keyframes fall {
-            to {
-                transform: translateY(800px) rotate(720deg);
-                opacity: 0;
-            }
-        }
-
-        /* Report Table */
-        .report-container {
-            width: 80%;
-            max-height: 400px;
-            overflow-y: auto;
-            background: white;
-            border-radius: 20px;
-            border: 3px solid #ff9f43;
-            padding: 20px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .report-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 2px dashed #eee;
-            font-size: 28px;
-        }
-
-        .report-item:last-child {
-            border-bottom: none;
-        }
-
-        audio.report-audio {
-            height: 40px;
-            outline: none;
-        }
-    </style>
+/* Drag review (concept practice) */
+.drag-area{
+  display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:20px 0;
+}
+.drag-card{
+  font-size:42px;padding:18px 28px;background:#feca57;color:white;
+  border-radius:18px;cursor:grab;box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  user-select:none;
+}
+.drag-card.dragging{opacity:0.5;}
+.drag-slot{
+  font-size:42px;padding:18px 28px;background:#fff;color:#aaa;
+  border-radius:18px;border:4px dashed #4facfe;min-width:140px;text-align:center;
+}
+.drag-slot.over{background:#e3f2fd;}
+.drag-slot.correct{background:#c8e6c9;color:#2c3e50;border-style:solid;}
+.drag-slot.wrong{background:#ffcdd2;color:#c62828;border-style:solid;}
+</style>
 </head>
 
 <body>
+<div id="app-container">
+  <div class="top-bar">
+    <div class="brand">🌱 겹받침 읽고 쓰기</div>
+    <div class="top-bar-right">
+      <div class="top-bar-info" id="user-info" style="display:none;"></div>
+      <button class="speaker-btn" id="speaker-btn" onclick="toggleSpeaker()" title="소리 켜기/끄기">🔇</button>
+    </div>
+  </div>
 
-    <div id="app-container">
-        <div class="top-bar">
-            <div class="brand">🌱 겹받침 읽고 쓰기</div>
-            <button class="speaker-btn" id="speaker-btn" onclick="toggleSpeaker()">🔈</button>
-        </div>
+  <div id="scene-content"></div>
 
-        <div id="scene-content">
-            <!-- Content Dynamic Injection -->
-        </div>
+  <!-- O/X Feedback -->
+  <div id="feedback-o" class="feedback-icon" style="color:#1dd1a1;">⭕</div>
+  <div id="feedback-x" class="feedback-icon" style="color:#ff6b6b;">❌</div>
 
-        <!-- O/X Feedback -->
-        <div id="feedback-o" class="feedback-icon" style="color: #1dd1a1;">⭕</div>
-        <div id="feedback-x" class="feedback-icon" style="color: #ff6b6b;">❌</div>
+  <!-- Record Overlay -->
+  <div id="record-overlay" class="record-overlay">
+    <h2 class="record-title">🎙️ 큰 소리로 천천히 읽어보세요!</h2>
+    <div id="record-word-card" class="record-word-card">단어</div>
+    <div class="record-buttons-row">
+      <button id="record-btn" class="record-btn" onclick="handleRecordClick()">🎤</button>
+      <button class="kb-toggle-btn" onclick="toggleKeyboardInput()">⌨️ 키보드로 입력</button>
+      <button class="help-btn-record" onclick="openHelp()">🆘 도움받기</button>
+    </div>
+    <div id="kb-input-area" class="kb-input-area">
+      <input id="kb-text" type="text" placeholder="여기에 단어를 써보세요" maxlength="20"/>
+      <button onclick="submitKeyboard()">✅ 입력 완료</button>
+    </div>
+    <div id="record-tutorial" class="record-tutorial">
+      마이크를 누르고 천천히 또박또박 읽어요.<br>
+      아래에 글자가 뜨면 ⏹️ 정지를 눌러요!
+    </div>
+    <div id="record-status" class="record-status">아래 마이크 버튼을 누르면 녹음이 시작됩니다.</div>
+  </div>
 
-        <!-- Record Overlays -->
-        <div id="record-overlay" class="record-overlay">
-            <h2 style="font-size: 48px; margin-bottom: 10px;">🎙️ 큰 소리로 천천히 읽어보세요!</h2>
-            <div id="record-word" style="font-size: 64px; color: #4facfe; margin-bottom: 30px;">단어</div>
-            <button id="record-btn" class="record-btn" onclick="handleRecordClick()">🎤</button>
-            <div id="record-instruction" style="font-size: 28px; line-height:1.4; margin-top: 25px; color: #e15f41; font-weight:bold; display:none; background:#fff3cd; padding:15px 30px; border-radius:20px; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.1);">
-                큰 소리로 천천히 또박또박 읽어보고,<br>아래 화면에 <span style="color:#000;">정확한 글자</span>가 뜨면 ⏹️ 정지 버튼을 누르세요!
-            </div>
-            <div id="record-status" style="font-size: 32px; margin-top: 25px; color: #555; height:50px;">마이크 버튼을 누르면 녹음이 시작됩니다.</div>
-        </div>
+  <!-- Self-evaluation Overlay -->
+  <div id="eval-overlay" class="eval-overlay">
+    <h2 class="eval-title">⭐ 스스로 평가해볼까요? ⭐</h2>
+    <div class="eval-subtitle">내 녹음을 들어보고 별을 골라요!</div>
+    <button class="eval-playback-btn" onclick="playMyRecording()">🎧 내 녹음 듣기</button>
+    <div class="stars-row" id="stars-row">
+      <button class="star-btn" data-val="1" onclick="setStars(1)">★</button>
+      <button class="star-btn" data-val="2" onclick="setStars(2)">★</button>
+      <button class="star-btn" data-val="3" onclick="setStars(3)">★</button>
+      <button class="star-btn" data-val="4" onclick="setStars(4)">★</button>
+      <button class="star-btn" data-val="5" onclick="setStars(5)">★</button>
+    </div>
+    <div class="eval-text" id="eval-text">별을 눌러서 점수를 정해요</div>
+    <div class="eval-warn" id="eval-warn">3개 이하예요. 다시 한 번 도전해볼까요?</div>
+    <div class="eval-actions">
+      <button class="btn-redo" onclick="redoRecording()">🔄 다시 녹음하기</button>
+      <button class="btn-next" id="eval-next-btn" onclick="finishEval()" disabled>✅ 다음으로</button>
+    </div>
+  </div>
+
+  <!-- Help Overlay -->
+  <div id="help-overlay" class="help-overlay">
+    <div class="help-card">
+      <h2>🆘 도움이 필요해요!</h2>
+      <div style="font-size:22px;color:#576574;">아래 예시를 들어보고 따라 읽어볼까요?</div>
+      <div class="help-examples" id="help-examples"></div>
+      <button class="help-close-btn" onclick="closeHelp()">알겠어요!</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================
+   1. Responsive Scale (1280x800 base)
+   ========================================================== */
+function resizeApp(){
+  const c=document.getElementById('app-container');
+  const sx=window.innerWidth/1280;
+  const sy=window.innerHeight/800;
+  const s=Math.min(sx,sy);
+  c.style.transform=`scale(${s})`;
+}
+window.addEventListener('resize',resizeApp);
+resizeApp();
+
+/* ==========================================================
+   2. Global State
+   ========================================================== */
+const GAS_URL=''; // ★ 배포 후 받은 웹앱 URL을 여기에 붙여넣으세요.
+
+let isSpeakerOn=false;
+let currentUser='';
+let learningHistory=[];   // 녹음 기록
+let problemLog=[];        // 문제별 기록 (정답/오답/도움받기)
+
+let appState={
+  students:['학생1','학생2','학생3'],
+  stage1:[
+    {Image:'🐔',Question:'소리는 [닥]이지만 쓸 때는?',SoundText:'꼬끼오~ 닭',Option1:'닥',Option2:'닭',Answer:'닭',Concept:'ㄹㄱ 받침',Feedback:"딩동댕! 소리는 [닥]이지만 쓸 때는 'ㄹㄱ' 받침을 써야 해."},
+    {Image:'🪑',Question:'의자에 편안하게 [안따].',SoundText:'의자에 앉다',Option1:'앉다',Option2:'안다',Answer:'앉다',Concept:'ㄴㅈ 받침',Feedback:"맞아! '안다'는 친구를 안아줄 때 쓰고, 의자에는 '앉다'를 써."},
+    {Image:'8️⃣',Question:'숫자 8은 어떻게 쓸까요?',SoundText:'여덟',Option1:'여덟',Option2:'여덜',Answer:'여덟',Concept:'ㄹㅂ 받침',Feedback:"참 잘했어! 소리는 [여덜]이지만 'ㄹㅂ' 받침이 있는 '여덟'이야."},
+    {Image:'🏷️',Question:'물건의 [갑]을 물어봐요.',SoundText:'얼마예요? 값',Option1:'갑',Option2:'값',Answer:'값',Concept:'ㅂㅅ 받침',Feedback:"훌륭해! 물건의 가격을 뜻할 때는 '값'이라고 써."}
+  ],
+  stage2:[
+    {Image:'🐔',Question:'그림에 알맞은 받침을 골라요.',Word:'닭',Target:'다_',Choices:['ㄱ','ㄹㄱ','ㄴㅈ','ㄹㅂ'],Answer:'ㄹㄱ'},
+    {Image:'🪑',Question:'의자에 편안하게 ___.',Word:'앉다',Target:'아_ 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄱㅅ'],Answer:'ㄴㅈ'},
+    {Image:'🏷️',Question:'물건의 ___을 물어봐요.',Word:'값',Target:'가_',Choices:['ㅂ','ㅂㅅ','ㄹㅁ','ㄹㅍ'],Answer:'ㅂㅅ'}
+  ],
+  stage3:[ // 받침 고르기 - 새로 정의 (단순화: 단어보고 받침 종류만 고르기)
+    {Word:'닭',Hint:'ㄷ + ㅏ + ___',Choices:['ㄱ','ㄹㄱ','ㄴㅈ','ㄱㅅ'],Answer:'ㄹㄱ'},
+    {Word:'앉다',Hint:'ㅇ + ㅏ + ___ + 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄹㅌ'],Answer:'ㄴㅈ'},
+    {Word:'값',Hint:'ㄱ + ㅏ + ___',Choices:['ㅂ','ㅂㅅ','ㄴㅈ','ㄹㄱ'],Answer:'ㅂㅅ'}
+  ],
+  stage4:[ // 발음 찾기
+    {Word:'맑다',Option1:'[막따]',Option2:'[말따]',Answer:'[막따]'},
+    {Word:'앉다',Option1:'[안자]',Option2:'[안따]',Answer:'[안따]'},
+    {Word:'여덟',Option1:'[여덜]',Option2:'[여덥]',Answer:'[여덜]'}
+  ]
+};
+
+let currentStage=1;
+let currentIndex=0;
+let problemsPerStage=5;
+
+// 녹음 카운팅: 5문제당 1번 녹음
+let recordTriggerSet=new Set(); // 어느 인덱스에서 녹음할지 미리 정해둠
+
+const contentDiv=document.getElementById('scene-content');
+
+/* ==========================================================
+   3. Audio - Speaker / TTS / SFX
+   ========================================================== */
+let currentAudioElement=null;
+let availableVoices=[];
+let preferredVoice=null;
+
+function loadVoices(){
+  availableVoices=speechSynthesis.getVoices();
+  if(!availableVoices.length) return;
+  // 1순위: Google 한국어 클라우드
+  preferredVoice=availableVoices.find(v=>v.lang==='ko-KR' && v.name.toLowerCase().includes('google') && !v.localService);
+  // 2순위: Wavenet/Neural2
+  if(!preferredVoice){
+    preferredVoice=availableVoices.find(v=>v.lang==='ko-KR' && /wavenet|neural2|neural-?a/i.test(v.name));
+  }
+  // 3순위: premium/enhanced/natural 키워드
+  if(!preferredVoice){
+    preferredVoice=availableVoices.find(v=>v.lang==='ko-KR' && /premium|enhanced|natural/i.test(v.name));
+  }
+  // 4순위: 한국어 아무거나
+  if(!preferredVoice){
+    preferredVoice=availableVoices.find(v=>v.lang==='ko-KR');
+  }
+}
+if('speechSynthesis' in window){
+  loadVoices();
+  speechSynthesis.onvoiceschanged=loadVoices;
+}
+
+function stopAllAudio(){
+  // 다른 재생 시 이전 오디오 정지
+  try{speechSynthesis.cancel();}catch(e){}
+  if(currentAudioElement && !currentAudioElement.paused){
+    try{currentAudioElement.pause();currentAudioElement.currentTime=0;}catch(e){}
+  }
+}
+
+function toggleSpeaker(){
+  isSpeakerOn=!isSpeakerOn;
+  const btn=document.getElementById('speaker-btn');
+  btn.textContent=isSpeakerOn?'🔊':'🔇';
+  btn.classList.toggle('on',isSpeakerOn);
+  if(!isSpeakerOn) stopAllAudio();
+  else playTTS('소리가 켜졌어요!');
+}
+
+function playTTS(text,opts={}){
+  if(!isSpeakerOn) return;
+  if(!('speechSynthesis' in window)) return;
+  stopAllAudio();
+  // [ ] 대괄호 발음 방지
+  let clean=text.replace(/\[/g,'').replace(/\]/g,'');
+  const ut=new SpeechSynthesisUtterance(clean);
+  ut.lang='ko-KR';
+  if(preferredVoice) ut.voice=preferredVoice;
+  ut.pitch=opts.pitch??1.0;
+  ut.rate=opts.rate??0.95;
+  ut.volume=opts.volume??1.0;
+  speechSynthesis.speak(ut);
+}
+
+function playSound(type){
+  if(!isSpeakerOn) return;
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.15,ctx.currentTime);
+    if(type==='correct'){
+      osc.frequency.setValueAtTime(600,ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200,ctx.currentTime+0.15);
+      osc.start();osc.stop(ctx.currentTime+0.2);
+    }else if(type==='wrong'){
+      osc.frequency.setValueAtTime(300,ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150,ctx.currentTime+0.25);
+      osc.start();osc.stop(ctx.currentTime+0.25);
+    }else if(type==='reward'){
+      osc.frequency.setValueAtTime(800,ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1600,ctx.currentTime+0.3);
+      osc.start();osc.stop(ctx.currentTime+0.3);
+    }
+  }catch(e){}
+}
+
+/* ==========================================================
+   4. Mic Init (앱 시작 시 1회만)
+   ========================================================== */
+let mediaRecorder=null;
+let audioChunks=[];
+let audioBlob=null;
+let audioBase64='';
+let micInitialized=false;
+let micRequested=false; // 이미 시도했는지 (성공/실패 무관)
+
+async function requestMic(){
+  if(micRequested) return;
+  micRequested=true;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    console.warn('No mic API');
+    return;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder=new MediaRecorder(stream);
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0) audioChunks.push(e.data);};
+    micInitialized=true;
+    const mb=document.getElementById('init-mic-btn');
+    if(mb){mb.textContent='✅ 마이크 준비 완료';mb.style.background='#1dd1a1';mb.disabled=true;}
+  }catch(e){
+    console.warn('Mic permission denied',e);
+    const mb=document.getElementById('init-mic-btn');
+    if(mb){mb.textContent='⌨️ 키보드로 입력해요';mb.style.background='#feca57';mb.disabled=true;}
+  }
+}
+
+/* ==========================================================
+   5. App Init - GAS Fetch
+   ========================================================== */
+window.onload=()=>{
+  contentDiv.innerHTML=`<h2 style="font-size:48px;color:#576574;">📚 데이터를 불러오는 중...</h2>`;
+  if(GAS_URL && GAS_URL.startsWith('http')){
+    fetch(GAS_URL)
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.success){
+          appState.students=data.students||appState.students;
+          appState.stage1=(data.stage1&&data.stage1.length)?data.stage1:appState.stage1;
+          appState.stage2=(data.stage2&&data.stage2.length)?data.stage2:appState.stage2;
+          appState.stage3=(data.stage3&&data.stage3.length)?data.stage3:appState.stage3;
+          appState.stage4=(data.stage4&&data.stage4.length)?data.stage4:appState.stage4;
+        }
+        renderIntro();
+      })
+      .catch(err=>{console.error(err);renderIntro();});
+  }else{
+    setTimeout(renderIntro,300);
+  }
+};
+
+/* ==========================================================
+   6. Intro
+   ========================================================== */
+function renderIntro(){
+  document.getElementById('user-info').style.display='none';
+  const opts=appState.students.map(s=>`<option value="${s}">${s}</option>`).join('');
+  contentDiv.innerHTML=`
+    <h1 class="intro-title">🎉 겹받침 읽고 쓰기 🎉</h1>
+    <div style="background:white;padding:20px 35px;border-radius:22px;border:4px dashed #4facfe;margin-bottom:25px;font-size:24px;color:#555;text-align:center;max-width:1000px;">
+      <div style="font-weight:bold;color:#4facfe;margin-bottom:8px;font-size:28px;">오늘의 모험 순서 🚀</div>
+      <span style="color:#ff6b6b;">1️⃣ 읽기</span> ➡️
+      <span style="color:#ff9f43;">2️⃣ 쓰기</span> ➡️
+      <span style="color:#feca57;">3️⃣ 받침 고르기</span> ➡️
+      <span style="color:#1dd1a1;">4️⃣ 발음 찾기</span>
+    </div>
+    <div style="font-size:26px;color:#576574;margin-bottom:10px;">이름을 골라요 👇</div>
+    <select id="student-select" class="intro-select">${opts}</select>
+    <br>
+    <button class="btn-secondary" id="init-mic-btn" onclick="requestMic()">🎤 마이크 준비하기</button>
+    <button class="btn-primary" style="background:#1dd1a1;" onclick="goLevelSelect()">▶️ 시작하기</button>
+    <div class="tutorial-bubble">먼저 마이크 버튼을 눌러서 마이크를 준비해요! 💡</div>
+  `;
+  // 음성 우선순위 다시 로딩 시도
+  setTimeout(loadVoices,300);
+}
+
+async function goLevelSelect(){
+  currentUser=document.getElementById('student-select').value;
+  document.getElementById('user-info').style.display='block';
+  document.getElementById('user-info').textContent=`👤 ${currentUser}`;
+  if(!micRequested){
+    await requestMic();
+  }
+  contentDiv.innerHTML=`
+    <div class="intro-title" style="margin-bottom:30px;">📝 문제 개수 선택</div>
+    <div style="font-size:30px;color:#555;margin-bottom:30px;">몇 문제를 풀어볼까요?</div>
+    <div class="choices-container" style="gap:30px;">
+      <button class="btn-primary" style="font-size:42px;padding:30px 36px;background:#feca57;color:#222;" onclick="startWithCount(3)">🌱<br>3개</button>
+      <button class="btn-primary" style="font-size:42px;padding:30px 36px;background:#1dd1a1;" onclick="startWithCount(5)">🌿<br>5개</button>
+      <button class="btn-primary" style="font-size:42px;padding:30px 36px;background:#4facfe;" onclick="startWithCount(10)">🌳<br>10개</button>
+    </div>
+    <div class="tutorial-bubble">처음이면 3개부터 천천히 시작해도 좋아요! 😊</div>
+  `;
+}
+
+function shuffleSlice(arr,n){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a.slice(0,n);
+}
+
+function startWithCount(count){
+  if(!appState._original){
+    appState._original={
+      stage1:[...appState.stage1],
+      stage2:[...appState.stage2],
+      stage3:[...appState.stage3],
+      stage4:[...appState.stage4]
+    };
+  }
+  problemsPerStage=count;
+  appState.stage1=shuffleSlice(appState._original.stage1,count);
+  appState.stage2=shuffleSlice(appState._original.stage2,count);
+  appState.stage3=shuffleSlice(appState._original.stage3,count);
+  appState.stage4=shuffleSlice(appState._original.stage4,count);
+  // 녹음 트리거 위치: 문제 인덱스 4, 9 (=5번째, 10번째 문제 풀고 나서)
+  recordTriggerSet=new Set();
+  // 5문제당 1번: 4(5번째 종료), 9(10번째 종료)
+  for(let i=4;i<count;i+=5){
+    recordTriggerSet.add(i);
+  }
+  // 만약 count<5인 경우 (3) 마지막 문제에서 1번 녹음
+  if(count<5) recordTriggerSet.add(count-1);
+  
+  learningHistory=[];
+  problemLog=[];
+  startStage(1);
+}
+
+function startStage(stage){
+  currentStage=stage;
+  currentIndex=0;
+  if(stage===1) renderStage1();
+  else if(stage===2) renderStage2();
+  else if(stage===3) renderStage3();
+  else if(stage===4) renderStage4();
+}
+
+/* ==========================================================
+   7. Feedback / Reward / Confetti
+   ========================================================== */
+function showFeedbackOverlay(isCorrect,callback){
+  const el=isCorrect?document.getElementById('feedback-o'):document.getElementById('feedback-x');
+  el.classList.add('show');
+  playSound(isCorrect?'correct':'wrong');
+  setTimeout(()=>{
+    el.classList.remove('show');
+    if(callback) callback();
+  },1000);
+}
+
+function rainConfetti(){
+  const stickers=['⭐','✨','🌟','💖','🌸','🎉','🎊','🌈','🦄','🍀'];
+  for(let i=0;i<70;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=Math.random()*100+'%';
+    c.style.animationDelay=(Math.random()*2)+'s';
+    c.textContent=stickers[Math.floor(Math.random()*stickers.length)];
+    document.getElementById('app-container').appendChild(c);
+    setTimeout(()=>c.remove(),3500);
+  }
+}
+
+function showRewardPop(emoji='⭐'){
+  const pop=document.createElement('div');
+  pop.className='reward-pop';
+  pop.textContent=emoji;
+  pop.style.left=(40+Math.random()*20)+'%';
+  pop.style.top=(40+Math.random()*20)+'%';
+  document.getElementById('app-container').appendChild(pop);
+  playSound('reward');
+  setTimeout(()=>pop.remove(),1400);
+}
+
+/* ==========================================================
+   8. Logging (LocalHistory + GAS POST)
+   ========================================================== */
+function logToSheet(payload){
+  if(!GAS_URL || !GAS_URL.startsWith('http')) return;
+  fetch(GAS_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify(payload)
+  }).then(r=>r.json()).then(d=>console.log('Saved',d)).catch(e=>console.warn(e));
+}
+
+function logProblemResult(stageNum,word,question,chosen,isCorrect,helpUsed){
+  const payload={
+    type:'problem',
+    student:currentUser,stage:stageNum,word:word,question:question,
+    chosen:chosen,isCorrect:isCorrect?'O':'X',
+    helpUsed:helpUsed?'O':'X',
+    timestamp:new Date().toISOString()
+  };
+  problemLog.push(payload);
+  logToSheet(payload);
+}
+
+function logRecording(word,stars,sttText,redoCount){
+  const payload={
+    type:'recording',
+    student:currentUser,stage:currentStage,word:word,
+    sttText:sttText||'',stars:stars,redoCount:redoCount,
+    audioBase64:audioBase64,audioType:'audio/webm',
+    timestamp:new Date().toISOString()
+  };
+  // 로컬 보관
+  learningHistory.push({
+    word:word,stars:stars,sttText:sttText,redoCount:redoCount,
+    audioBlob:audioBlob && audioBlob.size>0?audioBlob:null,
+    stage:currentStage
+  });
+  logToSheet(payload);
+}
+
+function logReflection(reflection){
+  logToSheet({
+    type:'reflection',
+    student:currentUser,reflection:reflection,
+    timestamp:new Date().toISOString()
+  });
+}
+
+/* ==========================================================
+   9. Stage Transitions
+   ========================================================== */
+function renderStageTransition(nextStage,title,emoji){
+  playTTS(`훌륭해요! 다음은 ${nextStage}단계, ${title}입니다.`);
+  showRewardPop('🏆');
+  contentDiv.innerHTML=`
+    <h2 style="font-size:72px;color:#ff9f43;margin-bottom:20px;">🎉 잘했어요! 🎉</h2>
+    <div style="background:white;padding:35px 50px;border-radius:30px;border:4px solid #1dd1a1;box-shadow:0 10px 22px rgba(0,0,0,0.1);margin-bottom:30px;text-align:center;">
+      <div style="font-size:28px;color:#7f8c8d;margin-bottom:10px;">다음 미션</div>
+      <div style="font-size:52px;color:#2c3e50;font-weight:bold;">${emoji} ${nextStage}단계: ${title}</div>
+    </div>
+    <button class="btn-primary" style="background:#4facfe;font-size:36px;padding:18px 50px;" onclick="startStage(${nextStage})">▶️ ${nextStage}단계 시작!</button>
+  `;
+}
+
+/* ==========================================================
+   10. Stage 1 - 읽기 (소리 듣고 글자 고르기)
+   ========================================================== */
+function renderStage1(){
+  if(currentIndex>=appState.stage1.length){
+    // 단계 끝 - 마지막에 녹음이면 처리 후 다음 단계
+    return goNextAfterStage(1);
+  }
+  const p=appState.stage1[currentIndex];
+  playTTS(`${currentIndex+1}번째 문제. ${p.Question}`);
+  contentDiv.innerHTML=`
+    <div class="stage-title">🔊 1단계: 읽기 (${currentIndex+1}/${appState.stage1.length})</div>
+    <div class="problem-card">
+      <div class="problem-image">${p.Image}</div>
+      <h2 class="problem-question">${p.Question}</h2>
+      <button class="problem-sound-btn" onclick="playTTS('${p.SoundText.replace(/'/g,"\\'")}')">🔊 소리 듣기</button>
+      <button class="btn-help" style="margin-left:8px;" onclick="openHelp()">🆘 도움받기</button>
+    </div>
+    <div class="choices-container">
+      <button class="choice-btn" onclick="checkStage1('${p.Option1}')">${p.Option1}</button>
+      <button class="choice-btn" onclick="checkStage1('${p.Option2}')">${p.Option2}</button>
+    </div>
+    <div class="tutorial-bubble">소리를 들어보고 알맞은 글자를 골라요 🌟</div>
+  `;
+}
+
+function checkStage1(sel){
+  const p=appState.stage1[currentIndex];
+  const ok=(sel===p.Answer);
+  if(!ok){
+    showFeedbackOverlay(false);
+    playTTS('다시 한 번 생각해볼까요?');
+    return;
+  }
+  logProblemResult(1,p.Answer,p.Question,sel,true,helpUsedThisProblem);
+  helpUsedThisProblem=false;
+  showFeedbackOverlay(true,()=>{
+    showRewardPop('⭐');
+    playTTS(p.Feedback);
+    setTimeout(()=>{
+      maybeRecordOrNext(p.Answer,()=>{
+        currentIndex++;
+        renderStage1();
+      });
+    },1200);
+  });
+}
+
+/* ==========================================================
+   11. Stage 2 - 쓰기 (받침 채우기)
+   ========================================================== */
+function formatBlank(targetStr){
+  if(!targetStr) return '';
+  // "다_" → 다 + 빈칸
+  return targetStr.replace(/([가-힣])_/g,
+    `<span class="batchim-blank"><span class="top">$1</span><span class="blank"></span></span>`);
+}
+
+function renderStage2(){
+  if(currentIndex>=appState.stage2.length){
+    return goNextAfterStage(2);
+  }
+  const p=appState.stage2[currentIndex];
+  playTTS(`${currentIndex+1}번째 문제. ${p.Question}`);
+  let choiceHTML='';
+  p.Choices.forEach(c=>{
+    choiceHTML+=`<button class="choice-btn batchim" onclick="checkStage2('${c}')">${c}</button>`;
+  });
+  contentDiv.innerHTML=`
+    <div class="stage-title">✏️ 2단계: 쓰기 (${currentIndex+1}/${appState.stage2.length})</div>
+    <div class="problem-card">
+      <div class="problem-image" style="font-size:80px;">${p.Image||'📝'}</div>
+      <h2 class="problem-question">${p.Question||'알맞은 받침을 골라보세요.'}</h2>
+      <button class="btn-help" onclick="openHelp()">🆘 도움받기</button>
+    </div>
+    <div class="problem-box">${formatBlank(p.Target)}</div>
+    <div class="choices-container">${choiceHTML}</div>
+    <div class="tutorial-bubble">빈칸에 알맞은 받침을 골라요! ✏️</div>
+  `;
+}
+
+function checkStage2(sel){
+  const p=appState.stage2[currentIndex];
+  const ok=(sel===p.Answer);
+  if(!ok){
+    showFeedbackOverlay(false);
+    playTTS('다시 생각해봐요. 빈칸에 어떤 받침이 들어갈까요?');
+    return;
+  }
+  logProblemResult(2,p.Word,p.Question,sel,true,helpUsedThisProblem);
+  helpUsedThisProblem=false;
+  // 정답 표시
+  const pb=document.querySelector('.problem-box');
+  if(pb){pb.innerHTML=p.Word;pb.style.color='#1dd1a1';}
+  showFeedbackOverlay(true,()=>{
+    showRewardPop('🌟');
+    playTTS(`정답이에요! ${p.Word}!`);
+    setTimeout(()=>{
+      maybeRecordOrNext(p.Word,()=>{
+        currentIndex++;
+        renderStage2();
+      });
+    },1000);
+  });
+}
+
+/* ==========================================================
+   12. Stage 3 - 받침 고르기 (단어 통째 보고 받침 종류 고르기)
+   ========================================================== */
+function renderStage3(){
+  if(currentIndex>=appState.stage3.length){
+    return goNextAfterStage(3);
+  }
+  const p=appState.stage3[currentIndex];
+  playTTS(`${currentIndex+1}번째 문제. ${p.Word}의 받침을 골라보세요.`);
+  let choiceHTML='';
+  p.Choices.forEach(c=>{
+    choiceHTML+=`<button class="choice-btn batchim" onclick="checkStage3('${c}')">${c}</button>`;
+  });
+  contentDiv.innerHTML=`
+    <div class="stage-title">🎯 3단계: 받침 고르기 (${currentIndex+1}/${appState.stage3.length})</div>
+    <div class="problem-card">
+      <div style="font-size:78px;color:#2c3e50;">${p.Word}</div>
+      <div style="font-size:28px;color:#576574;margin-top:10px;">${p.Hint||''}</div>
+      <button class="btn-help" style="margin-top:15px;" onclick="openHelp()">🆘 도움받기</button>
+    </div>
+    <div class="choices-container">${choiceHTML}</div>
+    <div class="tutorial-bubble">단어 속에 숨은 겹받침을 찾아요! 🎯</div>
+  `;
+}
+
+function checkStage3(sel){
+  const p=appState.stage3[currentIndex];
+  const ok=(sel===p.Answer);
+  if(!ok){
+    showFeedbackOverlay(false);
+    playTTS('다시 한 번 봐볼까요?');
+    return;
+  }
+  logProblemResult(3,p.Word,'받침 고르기',sel,true,helpUsedThisProblem);
+  helpUsedThisProblem=false;
+  showFeedbackOverlay(true,()=>{
+    showRewardPop('🎯');
+    playTTS(`맞아요! ${p.Word}의 받침은 ${p.Answer}이에요.`);
+    setTimeout(()=>{
+      maybeRecordOrNext(p.Word,()=>{
+        currentIndex++;
+        renderStage3();
+      });
+    },1000);
+  });
+}
+
+/* ==========================================================
+   13. Stage 4 - 발음 찾기
+   ========================================================== */
+function renderStage4(){
+  if(currentIndex>=appState.stage4.length){
+    return goNextAfterStage(4);
+  }
+  const p=appState.stage4[currentIndex];
+  const phon=p.Answer.replace(/\[|\]/g,'');
+  playTTS(`${currentIndex+1}번째 문제. ${p.Word}는 어떻게 발음할까요?`);
+  contentDiv.innerHTML=`
+    <div class="stage-title">👂 4단계: 발음 찾기 (${currentIndex+1}/${appState.stage4.length})</div>
+    <div class="s4-word-card">${p.Word}</div>
+    <div style="font-size:24px;color:#576574;margin-bottom:20px;">올바른 발음을 골라요</div>
+    <div class="choices-container">
+      <button class="choice-btn pron" onclick="checkStage4('${p.Option1}')">${p.Option1}</button>
+      <button class="choice-btn pron-alt" onclick="checkStage4('${p.Option2}')">${p.Option2}</button>
+    </div>
+    <button class="btn-help" style="margin-top:20px;" onclick="openHelp()">🆘 도움받기</button>
+    <div class="tutorial-bubble">잘 모르겠으면 도움받기를 눌러요 🆘</div>
+  `;
+}
+
+function checkStage4(sel){
+  const p=appState.stage4[currentIndex];
+  const ok=(sel===p.Answer);
+  if(!ok){
+    showFeedbackOverlay(false);
+    playTTS('이 단어는 어떻게 소리나는지 다시 생각해봐요.');
+    return;
+  }
+  logProblemResult(4,p.Word,'발음 찾기',sel,true,helpUsedThisProblem);
+  helpUsedThisProblem=false;
+  showFeedbackOverlay(true,()=>{
+    showRewardPop('🎵');
+    playTTS(`${p.Word}는 ${p.Answer.replace(/\[|\]/g,'')}로 발음해요.`);
+    setTimeout(()=>{
+      maybeRecordOrNext(p.Word,()=>{
+        currentIndex++;
+        renderStage4();
+      });
+    },1000);
+  });
+}
+
+/* ==========================================================
+   14. 녹음 트리거 - 5문제마다 1번
+   ========================================================== */
+function maybeRecordOrNext(wordToRecord,nextCallback){
+  // 현재 단계에서 녹음을 해야 할 인덱스인지 확인
+  if(recordTriggerSet.has(currentIndex)){
+    openRecordOverlay(wordToRecord,nextCallback);
+  }else{
+    nextCallback();
+  }
+}
+
+function goNextAfterStage(stageDone){
+  if(stageDone===1) renderStageTransition(2,'쓰기','✏️');
+  else if(stageDone===2) renderStageTransition(3,'받침 고르기','🎯');
+  else if(stageDone===3) renderStageTransition(4,'발음 찾기','👂');
+  else if(stageDone===4) renderReflection();
+}
+
+/* ==========================================================
+   15. Help (도움받기)
+   ========================================================== */
+let helpUsedThisProblem=false;
+
+const helpExamples=[
+  {word:'닭',sentence:'마당에 닭이 꼬꼬댁 울어요.'},
+  {word:'앉다',sentence:'의자에 바르게 앉다.'},
+  {word:'여덟',sentence:'사과 여덟 개를 셌어요.'},
+  {word:'값',sentence:'사과 값이 얼마예요?'},
+  {word:'몫',sentence:'네 몫은 잊지 않을게.'},
+  {word:'삶다',sentence:'달걀을 맛있게 삶다.'},
+  {word:'넓다',sentence:'운동장이 아주 넓다.'},
+  {word:'밟다',sentence:'낙엽을 사뿐히 밟다.'},
+  {word:'핥다',sentence:'아이스크림을 살짝 핥다.'},
+  {word:'읊다',sentence:'시를 천천히 읊다.'}
+];
+
+function openHelp(){
+  helpUsedThisProblem=true;
+  // 문제 단어와 관련 예시 우선 보여주기
+  let curWord='';
+  if(currentStage===1) curWord=appState.stage1[currentIndex]?.Answer;
+  else if(currentStage===2) curWord=appState.stage2[currentIndex]?.Word;
+  else if(currentStage===3) curWord=appState.stage3[currentIndex]?.Word;
+  else if(currentStage===4) curWord=appState.stage4[currentIndex]?.Word;
+
+  // 단어 매칭, 없으면 랜덤 3개
+  let matched=helpExamples.find(h=>h.word===curWord);
+  let picks=[];
+  if(matched) picks.push(matched);
+  // 추가로 2개 채우기
+  const others=helpExamples.filter(h=>h!==matched);
+  while(picks.length<3 && others.length){
+    const idx=Math.floor(Math.random()*others.length);
+    picks.push(others.splice(idx,1)[0]);
+  }
+  let html='';
+  picks.forEach(p=>{
+    html+=`<div class="help-ex-row"><span>${p.sentence}</span>
+      <button onclick="playTTS('${p.sentence.replace(/'/g,"\\'")}')">🔊 들어보기</button></div>`;
+  });
+  document.getElementById('help-examples').innerHTML=html;
+  document.getElementById('help-overlay').classList.add('show');
+  // 도움받기 시 스피커 자동 ON 안내
+  if(!isSpeakerOn){
+    playTTS(''); // dummy - 그냥 안내
+    // 임시로 켜주기
+    isSpeakerOn=true;
+    document.getElementById('speaker-btn').textContent='🔊';
+    document.getElementById('speaker-btn').classList.add('on');
+  }
+}
+
+function closeHelp(){
+  document.getElementById('help-overlay').classList.remove('show');
+}
+
+/* ==========================================================
+   16. Record Overlay
+   ========================================================== */
+let recordState=0;
+let finishRecordCallback=null;
+let finalTranscript='';
+let recognition=null;
+let currentRecordWord='';
+let currentRedoCount=0;
+
+if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();
+  recognition.lang='ko-KR';
+  recognition.interimResults=true;
+  recognition.continuous=true;
+  recognition.onresult=function(e){
+    let s='';
+    for(let i=0;i<e.results.length;i++) s+=e.results[i][0].transcript;
+    finalTranscript=s;
+    const st=document.getElementById('record-status');
+    if(st && recordState===1){
+      st.innerHTML=`<span style="color:#555;">받아쓰는 중 ➡️</span> <span class="stt-preview">${finalTranscript}</span>`;
+    }
+  };
+}
+
+function openRecordOverlay(word,cb){
+  finishRecordCallback=cb;
+  currentRecordWord=word;
+  currentRedoCount=0;
+  audioBase64='';audioChunks=[];audioBlob=null;
+  finalTranscript='';recordState=0;
+  document.getElementById('record-word-card').textContent=word;
+  document.getElementById('record-status').textContent='아래 마이크 버튼을 누르면 녹음이 시작됩니다.';
+  document.getElementById('record-tutorial').classList.remove('show');
+  const btn=document.getElementById('record-btn');
+  btn.textContent='🎤';btn.classList.remove('recording-anim');btn.disabled=false;
+  document.getElementById('kb-input-area').classList.remove('show');
+  document.getElementById('kb-text').value='';
+  document.getElementById('record-overlay').classList.add('show');
+  if(!micInitialized){
+    document.getElementById('record-status').innerHTML='⌨️ 마이크가 없어요. <strong>키보드로 입력</strong>해 주세요.';
+    btn.disabled=true;
+    document.getElementById('kb-input-area').classList.add('show');
+  }
+  playTTS(`${word}를 큰 소리로 읽어보세요.`);
+}
+
+function toggleKeyboardInput(){
+  const a=document.getElementById('kb-input-area');
+  a.classList.toggle('show');
+}
+
+function submitKeyboard(){
+  const txt=document.getElementById('kb-text').value.trim();
+  if(!txt){
+    alert('단어를 입력해주세요!');
+    return;
+  }
+  finalTranscript=txt;
+  // 키보드 입력은 녹음없이 통과 → 자기평가 단계로
+  audioBlob=null;audioBase64='';
+  goSelfEval();
+}
+
+window.handleRecordClick=async function(){
+  if(!micInitialized || !mediaRecorder){
+    alert('마이크가 준비되지 않았어요. 키보드로 입력해 주세요.');
+    return;
+  }
+  const btn=document.getElementById('record-btn');
+  const status=document.getElementById('record-status');
+  if(recordState===0){
+    // 녹음 시작
+    try{
+      audioChunks=[];finalTranscript='';
+      if(recognition){try{recognition.abort();}catch(e){} recognition.start();}
+      if(mediaRecorder.state!=='recording') mediaRecorder.start();
+      recordState=1;
+      btn.textContent='⏹️';btn.classList.add('recording-anim');
+      document.getElementById('record-tutorial').classList.add('show');
+      status.innerHTML=`<span style="color:#555;">여기에 여러분의 목소리가 글자로 나타나요!</span>`;
+    }catch(e){console.error(e);}
+  }else if(recordState===1){
+    // 녹음 종료
+    recordState=2;
+    btn.textContent='⏳';btn.disabled=true;
+    btn.classList.remove('recording-anim');
+    document.getElementById('record-tutorial').classList.remove('show');
+    status.textContent='저장 중입니다...';
+    setTimeout(()=>{if(recognition){try{recognition.stop();}catch(e){}}},400);
+    mediaRecorder.onstop=()=>{
+      setTimeout(()=>{
+        audioBlob=new Blob(audioChunks,{type:'audio/webm'});
+        const reader=new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend=()=>{
+          audioBase64=(reader.result||'').split(',')[1]||'';
+          goSelfEval();
+        };
+      },700);
+    };
+    if(mediaRecorder.state!=='inactive') mediaRecorder.stop();
+  }
+};
+
+/* ==========================================================
+   17. Self-evaluation (별점)
+   ========================================================== */
+let currentStars=0;
+
+function goSelfEval(){
+  document.getElementById('record-overlay').classList.remove('show');
+  document.getElementById('eval-overlay').classList.add('show');
+  currentStars=0;
+  document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('eval-text').textContent='별을 눌러서 점수를 정해요';
+  document.getElementById('eval-warn').classList.remove('show');
+  document.getElementById('eval-next-btn').disabled=true;
+  playTTS('내 녹음을 들어보고 별점을 골라요!');
+}
+
+function setStars(n){
+  currentStars=n;
+  document.querySelectorAll('.star-btn').forEach(b=>{
+    const v=parseInt(b.dataset.val);
+    b.classList.toggle('active',v<=n);
+  });
+  const msgs={1:'다음엔 더 잘할 수 있어!',2:'조금만 더 연습해요',3:'잘했어요! 한 번 더 도전해볼까?',4:'아주 잘했어요! 👍',5:'완벽해요! 🌟'};
+  document.getElementById('eval-text').textContent=msgs[n];
+  if(n<=3){
+    document.getElementById('eval-warn').classList.add('show');
+  }else{
+    document.getElementById('eval-warn').classList.remove('show');
+  }
+  document.getElementById('eval-next-btn').disabled=false;
+  playSound('reward');
+}
+
+function playMyRecording(){
+  if(!audioBlob){
+    if(finalTranscript) playTTS(finalTranscript);
+    else playTTS('녹음이 없어요.');
+    return;
+  }
+  stopAllAudio();
+  const url=URL.createObjectURL(audioBlob);
+  if(currentAudioElement){try{currentAudioElement.pause();}catch(e){}}
+  currentAudioElement=new Audio(url);
+  currentAudioElement.play();
+}
+
+function redoRecording(){
+  currentRedoCount++;
+  document.getElementById('eval-overlay').classList.remove('show');
+  audioBlob=null;audioBase64='';audioChunks=[];finalTranscript='';recordState=0;
+  document.getElementById('record-word-card').textContent=currentRecordWord;
+  document.getElementById('record-status').textContent='다시 녹음해볼까요? 마이크 버튼을 눌러요.';
+  const btn=document.getElementById('record-btn');
+  btn.textContent='🎤';btn.classList.remove('recording-anim');btn.disabled=!micInitialized;
+  document.getElementById('record-overlay').classList.add('show');
+  playTTS('좋아요! 다시 한 번 도전해봐요.');
+}
+
+function finishEval(){
+  document.getElementById('eval-overlay').classList.remove('show');
+  logRecording(currentRecordWord,currentStars,finalTranscript,currentRedoCount);
+  showRewardPop(currentStars>=4?'🌟':'⭐');
+  if(finishRecordCallback) finishRecordCallback();
+  finishRecordCallback=null;
+}
+
+/* ==========================================================
+   18. Reflection (전체 끝나고 1번)
+   ========================================================== */
+let reflectionData={hardest:'',mood:'',selfMessage:''};
+
+function renderReflection(){
+  contentDiv.innerHTML='';
+  const ov=document.createElement('div');
+  ov.className='reflection-overlay show';
+  ov.id='reflection-ov';
+  ov.innerHTML=`
+    <div class="reflection-title">🌈 오늘의 배움 정리하기 🌈</div>
+
+    <div class="reflection-q">오늘 가장 어려웠던 받침은?</div>
+    <div class="reflection-options" data-group="hardest">
+      <button onclick="pickReflection('hardest','ㄹㄱ',this)">ㄹㄱ (닭)</button>
+      <button onclick="pickReflection('hardest','ㄴㅈ',this)">ㄴㅈ (앉다)</button>
+      <button onclick="pickReflection('hardest','ㄹㅂ',this)">ㄹㅂ (여덟)</button>
+      <button onclick="pickReflection('hardest','ㅂㅅ',this)">ㅂㅅ (값)</button>
+      <button onclick="pickReflection('hardest','없어요',this)">하나도 안 어려웠어요!</button>
     </div>
 
-    <script>
-        /* =========================================
-           1. Scale Responsive Settings
-           ========================================= */
-        function resizeApp() {
-            const container = document.getElementById('app-container');
-            const scaleX = window.innerWidth / 1280;
-            const scaleY = window.innerHeight / 720;
-            const scale = Math.min(scaleX, scaleY);
-            container.style.transform = `scale(${scale})`;
-        }
-        window.addEventListener('resize', resizeApp);
-        resizeApp();
+    <div class="reflection-q">오늘 활동 기분은?</div>
+    <div class="reflection-options" data-group="mood">
+      <button onclick="pickReflection('mood','😄 재미있었어요',this)">😄 재미있었어요</button>
+      <button onclick="pickReflection('mood','🤔 조금 어려웠어요',this)">🤔 조금 어려웠어요</button>
+      <button onclick="pickReflection('mood','💪 더 잘하고 싶어요',this)">💪 더 잘하고 싶어요</button>
+    </div>
 
-        /* =========================================
-           2. Global State & Mocks
-           ========================================= */
-        let isSpeakerOn = false;
-        let currentUser = '';
-        let learningHistory = [];
+    <div class="reflection-q">스스로에게 한마디!</div>
+    <div class="reflection-options" data-group="selfMessage">
+      <button onclick="pickReflection('selfMessage','잘했어 나 자신!',this)">잘했어 나 자신! 👍</button>
+      <button onclick="pickReflection('selfMessage','다음에도 화이팅!',this)">다음에도 화이팅! 💪</button>
+      <button onclick="pickReflection('selfMessage','정말 멋졌어!',this)">정말 멋졌어! 🌟</button>
+    </div>
 
-        let appState = {
-            students: ['학생1', '학생2', '학생3'],
-            stage1: [
-                { Image: '🐔', Question: '소리는 [닥]이지만 쓸 때는?', SoundText: '꼬끼오~ 닭', Option1: '닥', Option2: '닭', Answer: '닭', Concept: 'ㄹㄱ 받침', Feedback: '딩동댕! 소리는 [닥]이지만 쓸 때는 \'ㄹㄱ\' 받침을 써야 해.' },
-                { Image: '🪑', Question: '의자에 편안하게 [안따].', SoundText: '의자에 앉다', Option1: '앉다', Option2: '안다', Answer: '앉다', Concept: 'ㄴㅈ 받침', Feedback: '맞아! \'안다\'는 친구를 안아줄 때 쓰고, 의자에는 \'앉다\'를 써.' },
-                { Image: '8️⃣', Question: '숫자 8은 어떻게 쓸까요?', SoundText: '여덟', Option1: '여덟', Option2: '여덜', Answer: '여덟', Concept: 'ㄹㅂ 받침', Feedback: '참 잘했어! 소리는 [여덜]이지만 \'ㄹㅂ\' 받침이 있는 \'여덟\'이야.' },
-                { Image: '🏷️', Question: '물건의 [갑]을 물어봐요.', SoundText: '얼마예요? 값', Option1: '갑', Option2: '값', Answer: '값', Concept: 'ㅂㅅ 받침', Feedback: '훌륭해! 물건의 가격을 뜻할 때는 \'값\'이라고 써.' }
-            ],
-            stage2: [
-                { Image: '🐔', Question: '소리는 [닥]이지만 쓸 때는?', Word: '닭', Target: '다_', Choices: ['ㄱ', 'ㄹㄱ', 'ㄴㅈ', 'ㄹㅂ'], Answer: 'ㄹㄱ' },
-                { Image: '🪑', Question: '의자에 편안하게 [안따].', Word: '앉다', Target: '아_ 다', Choices: ['ㄴ', 'ㄴㅈ', 'ㄹㅂ', 'ㄱㅅ'], Answer: 'ㄴㅈ' },
-                { Image: '8️⃣', Question: '숫자 8은 어떻게 쓸까요?', Word: '여덟', Target: '여 더_', Choices: ['ㄹ', 'ㄹㅂ', 'ㄹㅌ', 'ㄹㅁ'], Answer: 'ㄹㅂ' },
-                { Image: '🏞️', Question: '운동장이 아주 [널따].', Word: '넓다', Target: '너_ 다', Choices: ['ㅂ', 'ㄹㅂ', 'ㄹㅁ', 'ㄴㅈ'], Answer: 'ㄹㅂ' }
-            ],
-            stage3: [
-                { Word: '맑다', Option1: '[막따]', Option2: '[말따]', Answer: '[막따]' },
-                { Word: '앉다', Option1: '[안자]', Option2: '[안따]', Answer: '[안따]' },
-                { Word: '여덟', Option1: '[여덜]', Option2: '[여덥]', Answer: '[여덜]' }
-            ]
-        };
+    <button class="btn-primary" style="background:#1dd1a1;font-size:30px;padding:15px 40px;margin-top:18px;" onclick="finishReflection()">📝 정리 완료!</button>
+  `;
+  document.getElementById('app-container').appendChild(ov);
+  playTTS('오늘 배운 것을 정리해볼까요?');
+}
 
-        let currentStage = 0; // 2, 3 (concept), 4 (writing)
-        let currentIndex = 0;
+function pickReflection(group,val,btn){
+  reflectionData[group]=val;
+  const parent=btn.parentElement;
+  parent.querySelectorAll('button').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
 
-        let mediaRecorder = null;
-        let audioChunks = [];
-        let audioBlob = null;
-        let audioBase64 = '';
-        let micInitialized = false;
-        let isMicRequesting = false;
+function finishReflection(){
+  if(!reflectionData.hardest||!reflectionData.mood||!reflectionData.selfMessage){
+    alert('세 가지 모두 골라주세요!');
+    return;
+  }
+  logReflection(reflectionData);
+  const ov=document.getElementById('reflection-ov');
+  if(ov) ov.remove();
+  renderCompletion();
+}
 
-        const contentDiv = document.getElementById('scene-content');
+/* ==========================================================
+   19. Completion / 배움 기록표
+   ========================================================== */
+let reportAudioElements=[];
 
-        /* =========================================
-           3. Audio & Mic Setup
-           ========================================= */
-        function toggleSpeaker() {
-            isSpeakerOn = !isSpeakerOn;
-            document.getElementById('speaker-btn').textContent = isSpeakerOn ? '🔊' : '🔈';
-            if (isSpeakerOn) playTTS("소리가 켜졌습니다.");
-        }
+function renderCompletion(){
+  playTTS('모든 학습을 마쳤어요! 정말 대단해요!');
+  rainConfetti();
+  showRewardPop('🏆');
 
-        function playTTS(text) {
-            if (!isSpeakerOn) return;
-            // 괄호 [ ] 기호를 기계가 '대괄호'라고 읽는 오작동을 방지하기 위해 텍스트 정제
-            let cleanText = text.replace(/\[/g, '').replace(/\]/g, '');
-            const ut = new SpeechSynthesisUtterance(cleanText);
-            ut.lang = 'ko-KR';
-            speechSynthesis.speak(ut);
-        }
+  // 통계
+  const total=problemLog.filter(x=>x.type==='problem').length;
+  const correct=problemLog.filter(x=>x.type==='problem'&&x.isCorrect==='O').length;
+  const helpCount=problemLog.filter(x=>x.helpUsed==='O').length;
+  const recCount=learningHistory.length;
+  const avgStars=recCount?(learningHistory.reduce((s,x)=>s+(x.stars||0),0)/recCount).toFixed(1):0;
 
-        function playSound(type) {
-            if (!isSpeakerOn) return;
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                osc.connect(audioCtx.destination);
-                if (type === 'correct') {
-                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
-                } else {
-                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
-                }
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.2);
-            } catch (e) { }
-        }
+  let rows='';
+  learningHistory.forEach((it,i)=>{
+    let audio='<span style="color:#999;">녹음 없음</span>';
+    if(it.audioBlob && it.audioBlob.size>0){
+      const url=URL.createObjectURL(it.audioBlob);
+      audio=`<audio class="report-audio" controls preload="none" data-idx="${i}" src="${url}"></audio>`;
+    }
+    const stars='⭐'.repeat(it.stars||0)+'☆'.repeat(5-(it.stars||0));
+    rows+=`<div class="report-item">
+      <div><strong style="color:#576574;">${i+1}. ${it.word}</strong>
+        <span style="color:#999;font-size:18px;margin-left:8px;">[${it.stage}단계]</span></div>
+      <div class="report-stars">${stars}</div>
+      <div style="color:#576574;">받아쓰기: ${it.sttText||'-'}</div>
+      <div>${audio}</div>
+    </div>`;
+  });
 
-        async function requestMic() {
-            if (micInitialized || isMicRequesting) return;
-            isMicRequesting = true;
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+  contentDiv.innerHTML=`
+    <h1 style="font-size:48px;color:#4facfe;margin-bottom:8px;">🏆 배움 기록표</h1>
+    <div style="font-size:24px;color:#576574;margin-bottom:15px;">
+      ${currentUser} 친구 | 정답 ${correct}/${total} | 녹음 ${recCount}번 | 평균별점 ⭐${avgStars} | 도움 ${helpCount}번
+    </div>
+    <div class="report-container">${rows||'<div style="text-align:center;padding:20px;">기록이 없습니다.</div>'}</div>
+    <div style="display:flex;gap:15px;">
+      <button class="btn-primary" onclick="renderIntro()">🏠 처음으로</button>
+      <button class="btn-secondary" onclick="goLevelSelect()">🔄 한 번 더!</button>
+    </div>
+  `;
 
-                const micBtn = document.getElementById('init-mic-btn');
-                if (micBtn) {
-                   micBtn.textContent = '✅ 마이크 준비 완료';
-                   micBtn.style.background = '#1dd1a1';
-                   micBtn.disabled = true;
-                }
-                micInitialized = true;
-                playTTS("마이크가 연결되었습니다.");
-            } catch (e) {
-                console.warn("Mic auth failed:", e);
-            } finally {
-                isMicRequesting = false;
-            }
-        }
-
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxlDiABM19D8ObofOYwYmUuOOFJql5GNY48h3cAoY0wm-0TUGl5lJBiGUPVRBlP_z9lLw/exec'; // ★ 여기에 배포 후 발급받은 구글 앱스 스크립트 웹앱 주소(URL)를 복사해서 작은 따옴표 안에 넣으세요.
-
-        /* =========================================
-           4. App Initialization (GAS Fetch)
-           ========================================= */
-        window.onload = () => {
-            contentDiv.innerHTML = `<h2 class="intro-title" style="color:#555;">데이터를 불러오는 중...</h2>`;
-            if (GAS_URL && GAS_URL.startsWith('http')) {
-                fetch(GAS_URL)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            appState.students = data.students || appState.students;
-                            appState.stage1 = data.stage1 && data.stage1.length > 0 ? data.stage1 : appState.stage1;
-                            appState.stage2 = data.stage2 && data.stage2.length > 0 ? data.stage2 : appState.stage2;
-                            appState.stage3 = data.stage3 && data.stage3.length > 0 ? data.stage3 : appState.stage3;
-                        }
-                        renderIntro();
-                    })
-                    .catch(err => {
-                        console.error('Fetch Error:', err);
-                        renderIntro(); // Fallback setup
-                    });
-            } else {
-                setTimeout(renderIntro, 500); // Simulate network if GAS_URL is empty
-            }
-        };
-
-        async function renderLevelSelect() {
-            currentUser = document.getElementById('student-select').value;
-            if (!micInitialized) {
-                await requestMic();
-                if (!micInitialized) {
-                    alert("마이크 권한이 허용되지 않았습니다. 듣기 및 쓰기만 진행하며 녹음 요소는 건너뜁니다.");
-                }
-            }
-            contentDiv.innerHTML = `
-              <div class="intro-title" style="margin-bottom:40px;">문제 개수 선택</div>
-              <h2 style="font-size:32px; color:#555; margin-bottom:40px;">몇 문제를 풀어볼까요?</h2>
-              <div class="choices-container" style="justify-content:center; gap:30px;">
-                <button class="btn-primary" style="font-size:48px; padding:30px 40px; background:#feca57;" onclick="startWithCount(3)">3개 🌱</button>
-                <button class="btn-primary" style="font-size:48px; padding:30px 40px; background:#1dd1a1;" onclick="startWithCount(5)">5개 🌿</button>
-                <button class="btn-primary" style="font-size:48px; padding:30px 40px; background:#4facfe;" onclick="startWithCount(10)">10개 🌳</button>
-              </div>
-            `;
-        }
-
-        function getShuffledSlice(originalArray, count) {
-            // Fisher-Yates 완벽 셔플 (랜덤 섞기)
-            let arr = [...originalArray];
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr.slice(0, count);
-        }
-
-        function startWithCount(count) {
-            if (!appState.originalStage1) {
-                // 백업용 원본 데이터 보존
-                appState.originalStage1 = [...appState.stage1];
-                appState.originalStage2 = [...appState.stage2];
-                appState.originalStage3 = [...appState.stage3];
-            }
-            // 진짜 무작위로 섞은 뒤 원하는 개수(count)만큼만 뽑기
-            appState.stage1 = getShuffledSlice(appState.originalStage1, count);
-            appState.stage2 = getShuffledSlice(appState.originalStage2, count);
-            appState.stage3 = getShuffledSlice(appState.originalStage3, count);
-            startGame(1);
-        }
-
-        function renderIntro() {
-            let options = appState.students.map(s => `<option value="${s}">${s}</option>`).join('');
-            contentDiv.innerHTML = `
-      <h1 class="intro-title">🎉 겹받침 읽고 쓰기 🎉</h1>
-      <div style="background:white; padding:20px 40px; border-radius:20px; border:4px dashed #4facfe; margin-bottom:30px; font-size:28px; color:#555; text-align:center;">
-        <div style="font-weight:bold; color:#4facfe; margin-bottom:10px;">오늘의 모험 순서 🚀</div>
-        <span style="color:#ff9f43">1단계: 읽고 쓰기</span> ➡️ 
-        <span style="color:#1dd1a1">2단계: 받침 고르기</span> ➡️ 
-        <span style="color:#ff6b6b">3단계: 발음 찾기</span>
-      </div>
-      <select id="student-select" class="intro-select">
-        ${options}
-      </select>
-      <br><br>
-      <button class="btn-secondary" id="init-mic-btn" onclick="requestMic()">🎤 마이크 설정하기</button>
-      <br>
-      <button class="btn-primary" style="background:#1dd1a1;" onclick="renderLevelSelect()">▶️ 시작하기</button>
-    `;
-        }
-
-        function startGame(stage) {
-            learningHistory = [];
-            currentIndex = 0;
-            currentStage = stage;
-            if (stage === 1) renderStage1();
-            if (stage === 2) renderStage2();
-            if (stage === 3) renderStage3Concept(); // 3-1 Concept
-        }
-
-        /* =========================================
-           5. Feedback & Logging
-           ========================================= */
-        function showFeedbackOverlay(isCorrect, callback) {
-            const el = isCorrect ? document.getElementById('feedback-o') : document.getElementById('feedback-x');
-            el.classList.add('show');
-            playSound(isCorrect ? 'correct' : 'wrong');
-            setTimeout(() => {
-                el.classList.remove('show');
-                if (callback) callback();
-            }, 1000);
-        }
-
-        function logResult(wordPlayed, actionDesc, isCorrect, speechText, nextCallback) {
-            // Save locally
-            learningHistory.push({
-                word: wordPlayed,
-                action: actionDesc,
-                audioBlob: audioBlob
-            });
-            console.log(`[LOG] ${currentUser} | Stage ${currentStage} | ${actionDesc} | Correct:${isCorrect} | Speech:${speechText}`);
-
-            // Prepare Data
-            const payload = {
-                student: currentUser, stage: currentStage, action: actionDesc,
-                isCorrect: isCorrect ? 'O' : 'X', speechText: speechText, 
-                audioBase64: audioBase64, audioType: 'audio/webm'
-            };
-
-            // 네트워크 통신 대기 시간 때문에 다음 문제로 넘어가는 게 버벅거리지 않도록
-            // 콜백(다음 문제 넘어가기)을 먼저 즉시 실행해버립니다!
-            if (nextCallback) nextCallback();
-
-            if (GAS_URL && GAS_URL.startsWith('http')) {
-                fetch(GAS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify(payload)
-                })
-                    .then(res => res.json())
-                    .then(data => { console.log('Saved to Sheet:', data); })
-                    .catch(err => { console.error('Save failed:', err); });
-            }
-        }
-
-        /* =========================================
-           5.5 Stage 1 Logic
-           ========================================= */
-           
-        function renderStageTransition(nextStage, title, nextFuncName) {
-            playTTS(`훌륭해요! 다음은 ${nextStage}단계, ${title} 입니다.`);
-            contentDiv.innerHTML = `
-              <h2 style="font-size:80px; color:#ff9f43; margin-bottom:30px;">🎉 훌륭해요! 🎉</h2>
-              <div style="background:white; padding:40px; border-radius:30px; border:4px solid #1dd1a1; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom:40px;">
-                <div style="font-size:30px; color:#7f8c8d; margin-bottom:15px;">다음 미션</div>
-                <div style="font-size:55px; color:#2c3e50; font-weight:bold;">${nextStage}단계: ${title}</div>
-              </div>
-              <button class="btn-primary" style="background:#4facfe; font-size:40px; padding:20px 60px;" onclick="${nextFuncName}()">▶️ ${nextStage}단계 시작하기</button>
-            `;
-        }
-
-        function renderStage1() {
-            if (currentIndex >= appState.stage1.length) {
-                currentStage = 2;
-                currentIndex = 0;
-                renderStageTransition(2, "받침 고르기", "renderStage2");
-                return;
-            }
-            const problem = appState.stage1[currentIndex];
-            playTTS(`${currentIndex + 1}번째 문제. ${problem.Question}`);
-
-            contentDiv.innerHTML = `
-      <div class="stage-title">1단계: 겹받침 읽고 쓰기 (${currentIndex + 1}/${appState.stage1.length})</div>
-      <div style="font-size:120px; text-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom:20px;">${problem.Image}</div>
-      <div style="background:#fff; padding:30px; border-radius:30px; border:3px solid #ff9f43; margin-bottom:40px;">
-        <h2 style="font-size:40px; margin:0 0 20px 0; color:#2c3e50;">${problem.Question}</h2>
-        <button style="font-size:24px; padding:10px 20px; background:#f1f2f6; border-radius:15px; color:#3742fa; box-shadow:0 3px 5px rgba(0,0,0,0.1);" onclick="playTTS('${problem.SoundText}')">🔊 소리 듣기</button>
-      </div>
-      <div class="choices-container">
-        <button style="width:200px; height:120px; font-size:64px; border-radius:25px; background:#4facfe; color:white; box-shadow:0 5px 15px rgba(0,0,0,0.1);" onclick="checkStage1('${problem.Option1}')">${problem.Option1}</button>
-        <button style="width:200px; height:120px; font-size:64px; border-radius:25px; background:#4facfe; color:white; box-shadow:0 5px 15px rgba(0,0,0,0.1);" onclick="checkStage1('${problem.Option2}')">${problem.Option2}</button>
-      </div>
-    `;
-        }
-
-        function checkStage1(selectedAns) {
-            const problem = appState.stage1[currentIndex];
-            const isCorrect = (selectedAns === problem.Answer);
-            if (!isCorrect) {
-                showFeedbackOverlay(false);
-                playTTS("저런, 다시 한 번 생각해볼까요?");
-                return;
-            }
-            showFeedbackOverlay(true, () => {
-                openRecordOverlay(problem.Answer, (sttResult) => {
-                    logResult(problem.Answer, `Stage1: ${problem.Question}, Chosen: ${selectedAns}`, true, sttResult, () => {
-                        currentIndex++;
-                        renderStage1();
-                    });
-                }, `정답입니다! ${problem.Feedback}`);
-            });
-        }
-
-        function formatKoreanBlank(targetStr) {
-            if (!targetStr) return '';
-            return targetStr.replace(/([가-힣])_/g, `<div style="display:inline-flex; flex-direction:column; justify-content:center; align-items:center; vertical-align:top; line-height:1; position:relative; top:5px; margin: 0 5px;">
-        <span style="font-size:1em; margin-bottom:5px; letter-spacing:0;">$1</span>
-        <span style="width:0.8em; height:0.8em; border:6px dashed #ff9f43; border-radius:12px; background-color:#fff9f0; display:inline-block;"></span>
-      </div>`);
-        }
-
-        /* =========================================
-           6. Stage 2 Logic (Fill the blank)
-           ========================================= */
-        function renderStage2() {
-            if (currentIndex >= appState.stage2.length) {
-                currentStage = 3;
-                currentIndex = 0;
-                renderStageTransition(3, "올바른 발음 고르기", "renderStage3Concept");
-                return;
-            }
-            const problem = appState.stage2[currentIndex];
-
-            // Fallback UI text if problem comes from old array format
-            let imgHTML = problem.Image ? `<div style="font-size:100px; text-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom:10px;">${problem.Image}</div>` : '';
-            let qHTML = problem.Question ? `<div style="background:#fff; padding:15px 30px; border-radius:20px; border:3px solid #1dd1a1; margin-bottom:20px;"><h2 style="font-size:32px; margin:0; color:#2c3e50;">${problem.Question}</h2></div>` : '';
-            let voicePrompt = problem.Question ? `${currentIndex + 1}번째 문제. ${problem.Question} 알맞은 받침을 골라보세요.` : '알맞은 받침을 골라보세요.';
-            playTTS(voicePrompt);
-
-            // Generate Choices
-            let choiceHTML = '';
-            problem.Choices.forEach(c => {
-                choiceHTML += `<button class="choice-btn" onclick="checkStage2('${c}')">${c}</button>`;
-            });
-
-            contentDiv.innerHTML = `
-      <div class="stage-title">2단계: 받침 고르기 (${currentIndex + 1}/${appState.stage2.length})</div>
-      ${imgHTML}
-      ${qHTML}
-      <div class="problem-box" style="display:flex; justify-content:center; align-items:flex-end; gap:10px; margin: 30px 0;">${formatKoreanBlank(problem.Target)}</div>
-      <div class="choices-container" style="justify-content:center; gap:20px;">
-        ${choiceHTML}
-      </div>
-    `;
-        }
-
-        function checkStage2(selectedChar) {
-            const problem = appState.stage2[currentIndex];
-            const isCorrect = (selectedChar === problem.Answer);
-            if (!isCorrect) {
-                showFeedbackOverlay(false);
-                playTTS("다시 한 번 생각해볼까요?");
-                return;
-            }
-            // Correct! Show the completed word
-            document.querySelector('.problem-box').innerHTML = problem.Word;
-            document.querySelector('.problem-box').style.color = '#1dd1a1';
-            showFeedbackOverlay(true, () => {
-                openRecordOverlay(problem.Word, (sttResult) => {
-                    logResult(problem.Word, `Stage2: ${problem.Question}, Chosen: ${selectedChar}`, true, sttResult, () => {
-                        currentIndex++;
-                        renderStage2();
-                    });
-                });
-            });
-        }
-
-        /* =========================================
-           7. Stage 3 Logic (Concept -> Writing)
-           ========================================= */
-        function renderStage3Concept() {
-            if (currentIndex >= appState.stage3.length) {
-                renderCompletion();
-                return;
-            }
-            const problem = appState.stage3[currentIndex];
-            // '값', '닭' 같이 기계가 단독으로 발음하기 어려워하는 글자 대신, 정답으로 내장된 [갑], [닥] (실제 발음)을 TTS에 넘겨주어 정확한 소리를 들려줌
-            const phonetic = problem.Answer.replace(/\[|\]/g, ''); 
-            playTTS(`${phonetic}. 알맞은 발음을 선택하세요.`);
-
-            contentDiv.innerHTML = `
-      <div class="stage-title">3단계: 올바른 발음 고르기 (${currentIndex + 1}/${appState.stage3.length})</div>
-      <div class="s3-word-card">${problem.Word}</div>
-      <div class="choices-container">
-        <button style="width:250px; height:120px; font-size:64px; border-radius:25px; background:#ff9f43; color:white; box-shadow:0 5px 15px rgba(0,0,0,0.1);" onclick="checkStage3Concept('${problem.Option1}')">${problem.Option1}</button>
-        <button style="width:250px; height:120px; font-size:64px; border-radius:25px; background:#4facfe; color:white; box-shadow:0 5px 15px rgba(0,0,0,0.1);" onclick="checkStage3Concept('${problem.Option2}')">${problem.Option2}</button>
-      </div>
-    `;
-        }
-
-        function checkStage3Concept(selectedAns) {
-            const problem = appState.stage3[currentIndex];
-            const isCorrect = (selectedAns === problem.Answer);
-            if (!isCorrect) {
-                showFeedbackOverlay(false);
-                playTTS("이 단어의 발음을 다시 생각해봐요.");
-                return;
-            }
-            showFeedbackOverlay(true, () => {
-                openRecordOverlay(problem.Word, (sttResult) => {
-                    logResult(problem.Word, `Stage3 Pronunciation: ${problem.Word}, Picked: ${selectedAns}`, true, sttResult, () => {
-                        currentIndex++;
-                        renderStage3Concept();
-                    });
-                }, "발음을 정확히 맞췄어요!");
-            });
-        }
-
-
-
-        /* =========================================
-           8. Audio Recording Overlay & STT UI
-           ========================================= */
-        let recordState = 0; // 0: Idle, 1: Recording
-        let finishRecordCallback = null;
-        let finalTranscript = '';
-        let recognition = null;
-        
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRec();
-            recognition.lang = 'ko-KR';
-            // 실시간 미리보기 지원
-            recognition.interimResults = true;
-            recognition.continuous = true; // 계속 듣기
-            recognition.onresult = function(e) {
-                let currentStt = '';
-                for (let i = 0; i < e.results.length; ++i) {
-                    currentStt += e.results[i][0].transcript;
-                }
-                finalTranscript = currentStt;
-                
-                // 화면에 실시간으로 받아적고 있는 글자를 보여줌!
-                const statusEl = document.getElementById('record-status');
-                if (statusEl && recordState === 1) {
-                    statusEl.innerHTML = `<span style="color:#555;">받아쓰는 중 ➡️</span> <strong style="color:#00d2d3; font-size:36px; background:#fff; padding:5px 15px; border-radius:15px; box-shadow:0 3px 5px rgba(0,0,0,0.1)">${finalTranscript}</strong>`;
-                }
-            };
-        }
-
-        function openRecordOverlay(wordToRead, callback, prefixMsg = '') {
-            finishRecordCallback = callback;
-            audioBase64 = '';
-            audioChunks = [];
-            recordState = 0;
-            finalTranscript = '';
-
-            if (!mediaRecorder && !micInitialized) {
-                // If not initialized yet, we will prompt them when they click the mic button
-            }
-
-            const overlay = document.getElementById('record-overlay');
-            document.getElementById('record-word').textContent = wordToRead;
-
-            const btn = document.getElementById('record-btn');
-            btn.textContent = '🎤';
-            btn.classList.remove('recording-anim');
-            document.getElementById('record-instruction').style.display = 'none';
-            document.getElementById('record-status').textContent = '마이크 버튼을 누르면 녹음이 시작됩니다.';
-
-            overlay.style.display = 'flex';
-            if (prefixMsg) {
-                playTTS(`${prefixMsg} 이제 큰 소리로 읽고 마이크 버튼을 눌러주세요.`);
-            } else {
-                playTTS(`${wordToRead}. 큰 소리로 읽고 마이크 버튼을 눌러주세요.`);
-            }
-        }
-
-        window.handleRecordClick = async function () {
-            if (!micInitialized || !mediaRecorder) {
-                document.getElementById('record-overlay').style.display = 'none';
-                if (finishRecordCallback) finishRecordCallback('');
-                return;
-            }
-
-            const btn = document.getElementById('record-btn');
-            const status = document.getElementById('record-status');
-
-            if (recordState === 0) {
-                // Start Recording
-                try {
-                    finalTranscript = '';
-                    if (recognition) {
-                        try { recognition.abort(); } catch(e){} // 기존 세션 안전 종료
-                        recognition.start();
-                    }
-                    if (mediaRecorder && mediaRecorder.state !== 'recording') mediaRecorder.start();
-                    recordState = 1;
-                    btn.textContent = '⏹️';
-                    btn.classList.add('recording-anim');
-                    document.getElementById('record-instruction').style.display = 'block';
-                    status.innerHTML = `<span style="color:#555">여기에 여러분의 목소리가 글자로 나타납니다!</span>`;
-                } catch (e) { console.error(e); }
-            } else {
-                // Stop Recording
-                recordState = 2;
-                btn.textContent = '⏳';
-                document.getElementById('record-instruction').style.display = 'none';
-                btn.classList.remove('recording-anim');
-                status.textContent = '저장 중입니다... (STT 분석 중)';
-
-                // 사용자가 말을 마치자마자 정지 버튼을 눌렀을 때, 텍스트 변환이 미처 안 끝난 상태로 
-                // 강제 종료되는 것을 막기 위해 recognition.stop()을 살짝 뒤로 미룹니다.
-                setTimeout(() => {
-                    if (recognition) { try { recognition.stop(); } catch(e){} }
-                }, 400);
-
-                if (mediaRecorder) {
-                    mediaRecorder.onstop = () => {
-                        setTimeout(() => { // STT 결과가 최종 반영될 수 있도록 충분히 대기
-                            audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                            const reader = new FileReader();
-                            reader.readAsDataURL(audioBlob);
-                            reader.onloadend = () => {
-                                const b64 = reader.result.split(',')[1];
-                                audioBase64 = b64 || '';
-                                document.getElementById('record-overlay').style.display = 'none';
-                                if (finishRecordCallback) finishRecordCallback(finalTranscript);
-                            };
-                        }, 700); // STT 분석 정확도를 위해 여유시간 700ms 확보
-                    };
-                    if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-                }
-            }
-        }
-
-        /* =========================================
-           9. Completion
-           ========================================= */
-        function renderCompletion() {
-            playTTS("모든 학습을 마쳤습니다. 대단해요!");
-
-            // Confetti effect
-            for (let i = 0; i < 100; i++) {
-                const conf = document.createElement('div');
-                conf.className = 'confetti';
-                conf.style.left = Math.random() * 100 + '%';
-                conf.style.animationDelay = (Math.random() * 2) + 's';
-                conf.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                document.getElementById('app-container').appendChild(conf);
-            }
-
-            let reportRows = '';
-            learningHistory.forEach((item, i) => {
-                let audioHtml = '<span>녹음 없음</span>';
-                if (item.audioBlob && item.audioBlob.size > 0) {
-                    const audioUrl = URL.createObjectURL(item.audioBlob);
-                    audioHtml = `<audio class="report-audio" controls src="${audioUrl}"></audio>`;
-                }
-                reportRows += `
-        <div class="report-item">
-          <div><strong style="color:#576574;">${i + 1}. ${item.word}</strong> <span style="color:#1dd1a1; margin-left:15px; font-weight:bold;">O</span></div>
-          <div>${audioHtml}</div>
-        </div>
-      `;
-            });
-
-            contentDiv.innerHTML = `
-      <h1 style="font-size:50px; color:#4facfe; margin-bottom:10px;">배움 기록표</h1>
-      <div class="report-container">
-        ${reportRows.length ? reportRows : '<div style="text-align:center; padding: 20px;">기록이 없습니다.</div>'}
-      </div>
-      <button class="btn-primary" onclick="renderIntro()">처음으로 돌아가기</button>
-    `;
-        }
-    </script>
+  // 다른 audio 재생 시 이전 audio 자동 멈춤
+  setTimeout(()=>{
+    document.querySelectorAll('audio.report-audio').forEach(a=>{
+      a.addEventListener('play',()=>{
+        document.querySelectorAll('audio.report-audio').forEach(o=>{
+          if(o!==a && !o.paused){o.pause();o.currentTime=0;}
+        });
+        stopAllAudio();
+      });
+    });
+  },200);
+}
+</script>
 </body>
-
 </html>
