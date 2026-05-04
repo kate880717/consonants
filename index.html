@@ -127,8 +127,11 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
   box-shadow:0 6px 15px rgba(0,0,0,0.12);
 }
 .choice-btn.batchim{
-  min-width:120px;width:120px;height:120px;font-size:48px;
+  min-width:160px;width:auto;height:110px;
+  padding:0 25px;font-size:44px;
   background:#feca57;color:#fff;
+  white-space:nowrap;
+  letter-spacing:2px;
 }
 .choice-btn.pron{background:#ff9f43;font-size:54px;min-width:240px;}
 .choice-btn.pron-alt{background:#4facfe;font-size:54px;min-width:240px;}
@@ -555,7 +558,9 @@ function toggleSpeaker(){
 }
 
 function playTTS(text,opts={}){
-  if(!isSpeakerOn) return;
+  // 자동 안내(force=false)는 스피커가 꺼져있으면 무시
+  // 사용자가 직접 누른 소리 버튼(force=true)은 스피커 상태와 무관하게 재생
+  if(!opts.force && !isSpeakerOn) return;
   if(!('speechSynthesis' in window)) return;
   stopAllAudio();
   // [ ] 대괄호 발음 방지
@@ -567,6 +572,11 @@ function playTTS(text,opts={}){
   ut.rate=opts.rate??0.95;
   ut.volume=opts.volume??1.0;
   speechSynthesis.speak(ut);
+}
+
+// 사용자가 직접 누른 소리 버튼 전용 (스피커 OFF여도 재생)
+function playUserTTS(text){
+  playTTS(text,{force:true});
 }
 
 function playSound(type){
@@ -856,7 +866,7 @@ function renderStage1(){
     <div class="problem-card">
       <div class="problem-image">${p.Image}</div>
       <h2 class="problem-question">${p.Question}</h2>
-      <button class="problem-sound-btn" onclick="playTTS('${p.SoundText.replace(/'/g,"\\'")}')">🔊 소리 듣기</button>
+      <button class="problem-sound-btn" onclick="playUserTTS('${p.SoundText.replace(/'/g,"\\'")}')">🔊 소리 듣기</button>
       <button class="btn-help" style="margin-left:8px;" onclick="openHelp()">🆘 도움받기</button>
     </div>
     <div class="choices-container">
@@ -1098,18 +1108,10 @@ function openHelp(){
   let html='';
   picks.forEach(p=>{
     html+=`<div class="help-ex-row"><span>${p.sentence}</span>
-      <button onclick="playTTS('${p.sentence.replace(/'/g,"\\'")}')">🔊 들어보기</button></div>`;
+      <button onclick="playUserTTS('${p.sentence.replace(/'/g,"\\'")}')">🔊 들어보기</button></div>`;
   });
   document.getElementById('help-examples').innerHTML=html;
   document.getElementById('help-overlay').classList.add('show');
-  // 도움받기 시 스피커 자동 ON 안내
-  if(!isSpeakerOn){
-    playTTS(''); // dummy - 그냥 안내
-    // 임시로 켜주기
-    isSpeakerOn=true;
-    document.getElementById('speaker-btn').textContent='🔊';
-    document.getElementById('speaker-btn').classList.add('on');
-  }
 }
 
 function closeHelp(){
