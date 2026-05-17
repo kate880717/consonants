@@ -514,17 +514,17 @@ let problemLog=[];        // 문제별 기록 (정답/오답/도움받기)
 let appState={
   students:['학생1','학생2','학생3'],
   stage1:[
-    {Image:'🐔',Question:'소리는 [닥]이지만 쓸 때는?',SoundText:'꼬끼오~ 닭',Option1:'닥',Option2:'닭',Answer:'닭',Concept:'ㄹㄱ 받침',Feedback:"딩동댕! 소리는 [닥]이지만 쓸 때는 'ㄹㄱ' 받침을 써야 해."},
-    {Image:'🪑',Question:'의자에 편안하게 [안따].',SoundText:'의자에 앉다',Option1:'앉다',Option2:'안다',Answer:'앉다',Concept:'ㄴㅈ 받침',Feedback:"맞아! '안다'는 친구를 안아줄 때 쓰고, 의자에는 '앉다'를 써."},
-    {Image:'8️⃣',Question:'숫자 8은 어떻게 쓸까요?',SoundText:'여덟',Option1:'여덟',Option2:'여덜',Answer:'여덟',Concept:'ㄹㅂ 받침',Feedback:"참 잘했어! 소리는 [여덜]이지만 'ㄹㅂ' 받침이 있는 '여덟'이야."},
-    {Image:'🏷️',Question:'물건의 [갑]을 물어봐요.',SoundText:'얼마예요? 값',Option1:'갑',Option2:'값',Answer:'값',Concept:'ㅂㅅ 받침',Feedback:"훌륭해! 물건의 가격을 뜻할 때는 '값'이라고 써."}
+    {Question:'소리는 [닥]이지만 쓸 때는?',SoundText:'꼬끼오~ 닭',Option1:'닥',Option2:'닭',Answer:'닭',Concept:'ㄹㄱ 받침',Feedback:"딩동댕! 소리는 [닥]이지만 쓸 때는 'ㄹㄱ' 받침을 써야 해."},
+    {Question:'의자에 편안하게 [안따].',SoundText:'의자에 앉다',Option1:'앉다',Option2:'안다',Answer:'앉다',Concept:'ㄴㅈ 받침',Feedback:"맞아! '안다'는 친구를 안아줄 때 쓰고, 의자에는 '앉다'를 써."},
+    {Question:'숫자 8은 어떻게 쓸까요?',SoundText:'여덟',Option1:'여덟',Option2:'여덜',Answer:'여덟',Concept:'ㄹㅂ 받침',Feedback:"참 잘했어! 소리는 [여덜]이지만 'ㄹㅂ' 받침이 있는 '여덟'이야."},
+    {Question:'물건의 [갑]을 물어봐요.',SoundText:'얼마예요? 값',Option1:'갑',Option2:'값',Answer:'값',Concept:'ㅂㅅ 받침',Feedback:"훌륭해! 물건의 가격을 뜻할 때는 '값'이라고 써."}
   ],
   stage2:[
-    {Image:'🐔',Question:'그림에 알맞은 받침을 골라요.',Word:'닭',Target:'다_',Choices:['ㄱ','ㄹㄱ','ㄴㅈ','ㄹㅂ'],Answer:'ㄹㄱ'},
-    {Image:'🪑',Question:'의자에 편안하게 ___.',Word:'앉다',Target:'아_ 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄱㅅ'],Answer:'ㄴㅈ'},
-    {Image:'🏷️',Question:'물건의 ___을 물어봐요.',Word:'값',Target:'가_',Choices:['ㅂ','ㅂㅅ','ㄹㅁ','ㄹㅍ'],Answer:'ㅂㅅ'}
+    {Question:'그림에 알맞은 받침을 골라요.',Word:'닭',Target:'다_',Choices:['ㄱ','ㄹㄱ','ㄴㅈ','ㄹㅂ'],Answer:'ㄹㄱ'},
+    {Question:'의자에 편안하게 ___.',Word:'앉다',Target:'아_ 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄱㅅ'],Answer:'ㄴㅈ'},
+    {Question:'물건의 ___을 물어봐요.',Word:'값',Target:'가_',Choices:['ㅂ','ㅂㅅ','ㄹㅁ','ㄹㅍ'],Answer:'ㅂㅅ'}
   ],
-  stage3:[ // 받침 고르기 - 새로 정의 (단순화: 단어보고 받침 종류만 고르기)
+  stage3:[ // 받침 고르기
     {Word:'닭',Hint:'ㄷ + ㅏ + ___',Choices:['ㄱ','ㄹㄱ','ㄴㅈ','ㄱㅅ'],Answer:'ㄹㄱ'},
     {Word:'앉다',Hint:'ㅇ + ㅏ + ___ + 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄹㅌ'],Answer:'ㄴㅈ'},
     {Word:'값',Hint:'ㄱ + ㅏ + ___',Choices:['ㅂ','ㅂㅅ','ㄴㅈ','ㄹㄱ'],Answer:'ㅂㅅ'}
