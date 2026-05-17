@@ -6,9 +6,6 @@
 <title>겹받침 읽고 쓰기</title>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ================================
-   Reset & Base
-   ================================ */
 *{box-sizing:border-box;}
 html,body{
   margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;
@@ -17,9 +14,6 @@ html,body{
   display:flex;justify-content:center;align-items:center;color:#333;
 }
 
-/* ================================
-   Scale Container (1280x800 base)
-   ================================ */
 #app-container{
   width:1280px;height:800px;
   background:rgba(255,255,255,0.95);
@@ -29,9 +23,6 @@ html,body{
   display:flex;flex-direction:column;
 }
 
-/* ================================
-   Common UI
-   ================================ */
 button{
   font-family:'Jua',sans-serif;cursor:pointer;border:none;outline:none;
   transition:transform 0.1s,filter 0.2s;
@@ -40,11 +31,10 @@ button:active{transform:scale(0.95);}
 button:hover{filter:brightness(1.05);}
 button:disabled{cursor:not-allowed;opacity:0.6;}
 
-/* Top Bar */
 .top-bar{
   height:80px;display:flex;justify-content:space-between;align-items:center;
   padding:0 30px;background:rgba(255,255,255,0.9);
-  border-bottom:3px solid #e1e1e1;z-index:10;
+  border-bottom:3px solid #e1e1e1;z-index:10;flex-shrink:0;
 }
 .brand{font-size:32px;color:#4facfe;font-weight:bold;}
 .top-bar-right{display:flex;gap:15px;align-items:center;}
@@ -59,24 +49,21 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
 }
 .speaker-btn.on{background:#feca57;}
 
-/* Scene Area */
 #scene-content{
   flex:1;display:flex;flex-direction:column;
   justify-content:center;align-items:center;
-  position:relative;padding:15px 30px 20px;overflow:hidden;
-  gap:10px;
+  position:relative;padding:20px 30px;overflow:hidden;
+  gap:14px;
 }
 
-/* Stage Title - 카드 위가 아니라 흐름 안에 배치 */
 .stage-title{
-  font-size:28px;color:#576574;
-  background:white;padding:6px 22px;border-radius:22px;
+  font-size:30px;color:#576574;
+  background:white;padding:8px 26px;border-radius:24px;
   border:3px solid #4facfe;
   margin-bottom:0;
   flex-shrink:0;
 }
 
-/* Buttons */
 .btn-primary{
   font-size:30px;padding:14px 45px;background:#ff9f43;color:white;
   border-radius:25px;margin-top:15px;
@@ -87,12 +74,11 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
   border-radius:20px;margin-top:8px;
 }
 .btn-help{
-  font-size:22px;padding:10px 22px;background:#feca57;color:#222;
+  font-size:24px;padding:11px 24px;background:#feca57;color:#222;
   border-radius:16px;display:inline-flex;align-items:center;gap:8px;
   box-shadow:0 4px 10px rgba(254,202,87,0.4);
 }
 
-/* Intro */
 .intro-title{
   font-size:54px;color:#ff6b6b;margin:0 0 12px 0;text-align:center;
   text-shadow:3px 3px 0 #fff;
@@ -105,46 +91,46 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
 
 /* Stage shared */
 .problem-card{
-  background:white;padding:18px 35px 16px;border-radius:22px;
-  border:3px solid #ff9f43;margin-bottom:10px;text-align:center;
-  box-shadow:0 6px 15px rgba(0,0,0,0.08);
-  max-width:1100px;
+  background:white;padding:24px 44px 22px;border-radius:26px;
+  border:4px solid #ff9f43;margin-bottom:6px;text-align:center;
+  box-shadow:0 8px 18px rgba(0,0,0,0.1);
+  max-width:1120px;
 }
 .problem-image{
-  font-size:70px;
-  margin-bottom:6px;
-  line-height:1.1;
+  font-size:120px;
+  margin-bottom:10px;
+  line-height:1.05;
   display:block;
 }
-.problem-question{font-size:30px;margin:0 0 10px 0;color:#2c3e50;line-height:1.3;}
+.problem-question{font-size:42px;margin:0 0 16px 0;color:#2c3e50;line-height:1.3;}
 .problem-sound-btn{
-  font-size:22px;padding:8px 18px;background:#f1f2f6;
-  border-radius:16px;color:#3742fa;
+  font-size:26px;padding:11px 24px;background:#f1f2f6;
+  border-radius:18px;color:#3742fa;
   box-shadow:0 3px 6px rgba(0,0,0,0.1);
 }
 
 /* Choices */
-.choices-container{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;}
+.choices-container{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;}
 .choice-btn{
-  min-width:160px;height:95px;padding:0 28px;font-size:50px;
-  border-radius:22px;background:#4facfe;color:white;
-  box-shadow:0 6px 15px rgba(0,0,0,0.12);
+  min-width:240px;height:140px;padding:0 40px;font-size:76px;
+  border-radius:28px;background:#4facfe;color:white;
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
 }
 .choice-btn.batchim{
-  min-width:130px;width:auto;height:90px;
-  padding:0 22px;font-size:38px;
+  min-width:150px;width:auto;height:120px;
+  padding:0 30px;font-size:52px;
   background:#feca57;color:#fff;
   white-space:nowrap;
-  letter-spacing:2px;
+  letter-spacing:3px;
 }
-.choice-btn.pron{background:#ff9f43;font-size:46px;min-width:210px;}
-.choice-btn.pron-alt{background:#4facfe;font-size:46px;min-width:210px;}
+.choice-btn.pron{background:#ff9f43;font-size:58px;min-width:260px;height:140px;}
+.choice-btn.pron-alt{background:#4facfe;font-size:58px;min-width:260px;height:140px;}
 
 /* Stage 2 (Writing) target */
 .problem-box{
-  font-size:72px;letter-spacing:6px;margin:10px 0;color:#222;
+  font-size:88px;letter-spacing:6px;margin:14px 0;color:#222;
   display:flex;justify-content:center;align-items:center;
-  gap:10px;flex-wrap:nowrap;
+  gap:12px;flex-wrap:nowrap;
   line-height:1.1;
 }
 .batchim-blank{
@@ -155,28 +141,28 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
 }
 .batchim-blank .top{
   font-size:1em;
-  margin-bottom:3px;
+  margin-bottom:4px;
   letter-spacing:0;
   line-height:1;
 }
 .batchim-blank .blank{
-  width:0.5em;height:0.5em;
-  border:5px dashed #ff9f43;
-  border-radius:10px;
+  width:0.55em;height:0.55em;
+  border:6px dashed #ff9f43;
+  border-radius:12px;
   background:#fff9f0;
   box-sizing:border-box;
 }
 
 /* Stage 4 word card */
 .s4-word-card{
-  font-size:70px;padding:18px 50px;background:white;
-  border:5px dashed #ff9f43;border-radius:25px;margin-bottom:18px;
+  font-size:90px;padding:24px 64px;background:white;
+  border:6px dashed #ff9f43;border-radius:28px;margin-bottom:20px;
 }
 
 /* Tutorial bubble */
 .tutorial-bubble{
   display:inline-block;background:#fff3cd;color:#e15f41;
-  padding:8px 20px;border-radius:16px;font-size:20px;
+  padding:10px 24px;border-radius:18px;font-size:24px;
   margin-top:8px;box-shadow:0 4px 10px rgba(0,0,0,0.06);
   border:2px dashed #ff9f43;
 }
@@ -189,7 +175,6 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
 }
 .feedback-icon.show{opacity:1;transform:translate(-50%,-50%) scale(1.2);}
 
-/* Confetti / sticker rain */
 .confetti{
   position:absolute;width:18px;height:18px;top:-20px;
   z-index:60;animation:fall 3s linear forwards;
@@ -199,7 +184,6 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
   to{transform:translateY(900px) rotate(720deg);opacity:0;}
 }
 
-/* Reward popup (small floating sticker) */
 .reward-pop{
   position:absolute;font-size:80px;z-index:70;
   animation:reward-anim 1.4s ease-out forwards;pointer-events:none;
@@ -210,9 +194,6 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
   100%{transform:translate(-50%,-200%) scale(0.8);opacity:0;}
 }
 
-/* ================================
-   Record Overlay
-   ================================ */
 .record-overlay{
   position:absolute;top:0;left:0;width:100%;height:100%;
   background:rgba(255,255,255,0.97);
@@ -226,7 +207,6 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
   padding:25px 60px;font-size:80px;color:#4facfe;margin-bottom:20px;
   box-shadow:0 8px 20px rgba(79,172,254,0.25);
   min-width:300px;text-align:center;
-  /* whiteCard never gets cut */
   max-width:90%;
 }
 .record-buttons-row{
@@ -279,7 +259,6 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
   font-size:24px;padding:10px 24px;background:#1dd1a1;color:white;border-radius:18px;
 }
 
-/* Self-eval Overlay */
 .eval-overlay{
   position:absolute;top:0;left:0;width:100%;height:100%;
   background:rgba(255,255,255,0.97);
@@ -334,7 +313,6 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
 }
 .eval-warn.show{display:block;}
 
-/* Help Overlay */
 .help-overlay{
   position:absolute;top:0;left:0;width:100%;height:100%;
   background:rgba(0,0,0,0.5);
@@ -361,7 +339,6 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
   font-size:26px;padding:12px 30px;background:#576574;color:white;border-radius:20px;
 }
 
-/* Reflection Overlay */
 .reflection-overlay{
   position:absolute;top:0;left:0;width:100%;height:100%;
   background:rgba(255,255,255,0.98);
@@ -385,7 +362,6 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
   background:#1dd1a1;color:white;border-color:#1dd1a1;
 }
 
-/* Report */
 .report-container{
   width:88%;max-height:480px;overflow-y:auto;
   background:white;border-radius:22px;border:3px solid #ff9f43;
@@ -399,24 +375,6 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
 .report-item:last-child{border-bottom:none;}
 .report-stars{color:#feca57;font-size:24px;}
 audio.report-audio{height:40px;outline:none;max-width:260px;}
-
-/* Drag review (concept practice) */
-.drag-area{
-  display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:20px 0;
-}
-.drag-card{
-  font-size:42px;padding:18px 28px;background:#feca57;color:white;
-  border-radius:18px;cursor:grab;box-shadow:0 4px 10px rgba(0,0,0,0.1);
-  user-select:none;
-}
-.drag-card.dragging{opacity:0.5;}
-.drag-slot{
-  font-size:42px;padding:18px 28px;background:#fff;color:#aaa;
-  border-radius:18px;border:4px dashed #4facfe;min-width:140px;text-align:center;
-}
-.drag-slot.over{background:#e3f2fd;}
-.drag-slot.correct{background:#c8e6c9;color:#2c3e50;border-style:solid;}
-.drag-slot.wrong{background:#ffcdd2;color:#c62828;border-style:solid;}
 </style>
 </head>
 
@@ -432,11 +390,9 @@ audio.report-audio{height:40px;outline:none;max-width:260px;}
 
   <div id="scene-content"></div>
 
-  <!-- O/X Feedback -->
   <div id="feedback-o" class="feedback-icon" style="color:#1dd1a1;">⭕</div>
   <div id="feedback-x" class="feedback-icon" style="color:#ff6b6b;">❌</div>
 
-  <!-- Record Overlay -->
   <div id="record-overlay" class="record-overlay">
     <h2 class="record-title">🎙️ 큰 소리로 천천히 읽어보세요!</h2>
     <div id="record-word-card" class="record-word-card">단어</div>
@@ -456,7 +412,6 @@ audio.report-audio{height:40px;outline:none;max-width:260px;}
     <div id="record-status" class="record-status">아래 마이크 버튼을 누르면 녹음이 시작됩니다.</div>
   </div>
 
-  <!-- Self-evaluation Overlay -->
   <div id="eval-overlay" class="eval-overlay">
     <h2 class="eval-title">⭐ 스스로 평가해볼까요? ⭐</h2>
     <div class="eval-subtitle">먼저 내 녹음을 들어보고 별을 골라요!</div>
@@ -476,7 +431,6 @@ audio.report-audio{height:40px;outline:none;max-width:260px;}
     </div>
   </div>
 
-  <!-- Help Overlay -->
   <div id="help-overlay" class="help-overlay">
     <div class="help-card">
       <h2>🆘 도움이 필요해요!</h2>
@@ -488,9 +442,7 @@ audio.report-audio{height:40px;outline:none;max-width:260px;}
 </div>
 
 <script>
-/* ==========================================================
-   1. Responsive Scale (1280x800 base)
-   ========================================================== */
+/* ===== 1. Responsive Scale ===== */
 function resizeApp(){
   const c=document.getElementById('app-container');
   const sx=window.innerWidth/1280;
@@ -501,15 +453,13 @@ function resizeApp(){
 window.addEventListener('resize',resizeApp);
 resizeApp();
 
-/* ==========================================================
-   2. Global State
-   ========================================================== */
-const GAS_URL='https://script.google.com/macros/s/AKfycbxlDiABM19D8ObofOYwYmUuOOFJql5GNY48h3cAoY0wm-0TUGl5lJBiGUPVRBlP_z9lLw/exec'; // ★ 배포 후 받은 웹앱 URL
+/* ===== 2. Global State ===== */
+const GAS_URL='https://script.google.com/macros/s/AKfycbxlDiABM19D8ObofOYwYmUuOOFJql5GNY48h3cAoY0wm-0TUGl5lJBiGUPVRBlP_z9lLw/exec';
 
 let isSpeakerOn=false;
 let currentUser='';
-let learningHistory=[];   // 녹음 기록
-let problemLog=[];        // 문제별 기록 (정답/오답/도움받기)
+let learningHistory=[];
+let problemLog=[];
 
 let appState={
   students:['학생1','학생2','학생3'],
@@ -524,12 +474,12 @@ let appState={
     {Image:'🪑',Question:'의자에 편안하게 ___.',Word:'앉다',Target:'아_ 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄱㅅ'],Answer:'ㄴㅈ'},
     {Image:'🏷️',Question:'물건의 ___을 물어봐요.',Word:'값',Target:'가_',Choices:['ㅂ','ㅂㅅ','ㄹㅁ','ㄹㅍ'],Answer:'ㅂㅅ'}
   ],
-  stage3:[ // 받침 고르기 - 새로 정의 (단순화: 단어보고 받침 종류만 고르기)
+  stage3:[
     {Word:'닭',Hint:'ㄷ + ㅏ + ___',Choices:['ㄱ','ㄹㄱ','ㄴㅈ','ㄱㅅ'],Answer:'ㄹㄱ'},
     {Word:'앉다',Hint:'ㅇ + ㅏ + ___ + 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄹㅌ'],Answer:'ㄴㅈ'},
     {Word:'값',Hint:'ㄱ + ㅏ + ___',Choices:['ㅂ','ㅂㅅ','ㄴㅈ','ㄹㄱ'],Answer:'ㅂㅅ'}
   ],
-  stage4:[ // 발음 찾기
+  stage4:[
     {Word:'맑다',Option1:'[막따]',Option2:'[말따]',Answer:'[막따]'},
     {Word:'앉다',Option1:'[안자]',Option2:'[안따]',Answer:'[안따]'},
     {Word:'여덟',Option1:'[여덜]',Option2:'[여덥]',Answer:'[여덜]'}
@@ -539,15 +489,21 @@ let appState={
 let currentStage=1;
 let currentIndex=0;
 let problemsPerStage=5;
-
-// 녹음 카운팅: 5문제당 1번 녹음
-let recordTriggerSet=new Set(); // 어느 인덱스에서 녹음할지 미리 정해둠
+let recordTriggerSet=new Set();
 
 const contentDiv=document.getElementById('scene-content');
 
-/* ==========================================================
-   3. Audio - Speaker / TTS / SFX
-   ========================================================== */
+/* ===== 보기 순서 섞기 (정답 위치 랜덤화) ===== */
+function shuffleArray(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+/* ===== 3. Audio ===== */
 let currentAudioElement=null;
 let availableVoices=[];
 let preferredVoice=null;
@@ -555,17 +511,13 @@ let preferredVoice=null;
 function loadVoices(){
   availableVoices=speechSynthesis.getVoices();
   if(!availableVoices.length) return;
-  // 1순위: Google 한국어 클라우드
   preferredVoice=availableVoices.find(v=>v.lang==='ko-KR' && v.name.toLowerCase().includes('google') && !v.localService);
-  // 2순위: Wavenet/Neural2
   if(!preferredVoice){
     preferredVoice=availableVoices.find(v=>v.lang==='ko-KR' && /wavenet|neural2|neural-?a/i.test(v.name));
   }
-  // 3순위: premium/enhanced/natural 키워드
   if(!preferredVoice){
     preferredVoice=availableVoices.find(v=>v.lang==='ko-KR' && /premium|enhanced|natural/i.test(v.name));
   }
-  // 4순위: 한국어 아무거나
   if(!preferredVoice){
     preferredVoice=availableVoices.find(v=>v.lang==='ko-KR');
   }
@@ -576,7 +528,6 @@ if('speechSynthesis' in window){
 }
 
 function stopAllAudio(){
-  // 다른 재생 시 이전 오디오 정지
   try{speechSynthesis.cancel();}catch(e){}
   if(currentAudioElement && !currentAudioElement.paused){
     try{currentAudioElement.pause();currentAudioElement.currentTime=0;}catch(e){}
@@ -593,12 +544,9 @@ function toggleSpeaker(){
 }
 
 function playTTS(text,opts={}){
-  // 자동 안내(force=false)는 스피커가 꺼져있으면 무시
-  // 사용자가 직접 누른 소리 버튼(force=true)은 스피커 상태와 무관하게 재생
   if(!opts.force && !isSpeakerOn) return;
   if(!('speechSynthesis' in window)) return;
   stopAllAudio();
-  // [ ] 대괄호 발음 방지
   let clean=text.replace(/\[/g,'').replace(/\]/g,'');
   const ut=new SpeechSynthesisUtterance(clean);
   ut.lang='ko-KR';
@@ -609,7 +557,6 @@ function playTTS(text,opts={}){
   speechSynthesis.speak(ut);
 }
 
-// 사용자가 직접 누른 소리 버튼 전용 (스피커 OFF여도 재생)
 function playUserTTS(text){
   playTTS(text,{force:true});
 }
@@ -638,15 +585,13 @@ function playSound(type){
   }catch(e){}
 }
 
-/* ==========================================================
-   4. Mic Init (앱 시작 시 1회만)
-   ========================================================== */
+/* ===== 4. Mic ===== */
 let mediaRecorder=null;
 let audioChunks=[];
 let audioBlob=null;
 let audioBase64='';
 let micInitialized=false;
-let micRequested=false; // 이미 시도했는지 (성공/실패 무관)
+let micRequested=false;
 
 async function requestMic(){
   if(micRequested) return;
@@ -669,9 +614,7 @@ async function requestMic(){
   }
 }
 
-/* ==========================================================
-   5. App Init - GAS Fetch
-   ========================================================== */
+/* ===== 5. App Init ===== */
 window.onload=()=>{
   contentDiv.innerHTML=`<h2 style="font-size:48px;color:#576574;">📚 데이터를 불러오는 중...</h2>`;
   if(GAS_URL && GAS_URL.startsWith('http')){
@@ -693,9 +636,7 @@ window.onload=()=>{
   }
 };
 
-/* ==========================================================
-   6. Intro
-   ========================================================== */
+/* ===== 6. Intro ===== */
 function renderIntro(){
   document.getElementById('user-info').style.display='none';
   const opts=appState.students.map(s=>`<option value="${s}">${s}</option>`).join('');
@@ -768,15 +709,11 @@ function startWithCount(count){
   appState.stage2=shuffleSlice(appState._original.stage2,count);
   appState.stage3=shuffleSlice(appState._original.stage3,count);
   appState.stage4=shuffleSlice(appState._original.stage4,count);
-  // 녹음 트리거 위치: 문제 인덱스 4, 9 (=5번째, 10번째 문제 풀고 나서)
   recordTriggerSet=new Set();
-  // 5문제당 1번: 4(5번째 종료), 9(10번째 종료)
   for(let i=4;i<count;i+=5){
     recordTriggerSet.add(i);
   }
-  // 만약 count<5인 경우 (3) 마지막 문제에서 1번 녹음
   if(count<5) recordTriggerSet.add(count-1);
-  
   learningHistory=[];
   problemLog=[];
   startStage(1);
@@ -791,9 +728,7 @@ function startStage(stage){
   else if(stage===4) renderStage4();
 }
 
-/* ==========================================================
-   7. Feedback / Reward / Confetti
-   ========================================================== */
+/* ===== 7. Feedback ===== */
 function showFeedbackOverlay(isCorrect,callback){
   const el=isCorrect?document.getElementById('feedback-o'):document.getElementById('feedback-x');
   el.classList.add('show');
@@ -828,9 +763,7 @@ function showRewardPop(emoji='⭐'){
   setTimeout(()=>pop.remove(),1400);
 }
 
-/* ==========================================================
-   8. Logging (LocalHistory + GAS POST)
-   ========================================================== */
+/* ===== 8. Logging ===== */
 function logToSheet(payload){
   if(!GAS_URL || !GAS_URL.startsWith('http')) return;
   fetch(GAS_URL,{
@@ -860,7 +793,6 @@ function logRecording(word,stars,sttText,redoCount){
     audioBase64:audioBase64,audioType:'audio/webm',
     timestamp:new Date().toISOString()
   };
-  // 로컬 보관
   learningHistory.push({
     word:word,stars:stars,sttText:sttText,redoCount:redoCount,
     audioBlob:audioBlob && audioBlob.size>0?audioBlob:null,
@@ -877,9 +809,7 @@ function logReflection(reflection){
   });
 }
 
-/* ==========================================================
-   9. Stage Transitions
-   ========================================================== */
+/* ===== 9. Stage Transitions ===== */
 function renderStageTransition(nextStage,title,emoji){
   playTTS(`훌륭해요! 다음은 ${nextStage}단계, ${title}입니다.`);
   showRewardPop('🏆');
@@ -893,27 +823,25 @@ function renderStageTransition(nextStage,title,emoji){
   `;
 }
 
-/* ==========================================================
-   10. Stage 1 - 읽기 (소리 듣고 글자 고르기)
-   ========================================================== */
+/* ===== 10. Stage 1 - 읽기 ===== */
 function renderStage1(){
   if(currentIndex>=appState.stage1.length){
-    // 단계 끝 - 마지막에 녹음이면 처리 후 다음 단계
     return goNextAfterStage(1);
   }
   const p=appState.stage1[currentIndex];
   playTTS(`${currentIndex+1}번째 문제. ${p.Question}`);
+  const opts=shuffleArray([p.Option1,p.Option2]);
   contentDiv.innerHTML=`
     <div class="stage-title">🔊 1단계: 읽기 (${currentIndex+1}/${appState.stage1.length})</div>
     <div class="problem-card">
-      <div class="problem-image">${p.Image}</div>
+      <div class="problem-image">${p.Image||'📖'}</div>
       <h2 class="problem-question">${p.Question}</h2>
-      <button class="problem-sound-btn" onclick="playUserTTS('${p.SoundText.replace(/'/g,"\\'")}')">🔊 소리 듣기</button>
+      <button class="problem-sound-btn" onclick="playUserTTS('${(p.SoundText||'').replace(/'/g,"\\'")}')">🔊 소리 듣기</button>
       <button class="btn-help" style="margin-left:8px;" onclick="openHelp()">🆘 도움받기</button>
     </div>
     <div class="choices-container">
-      <button class="choice-btn" onclick="checkStage1('${p.Option1}')">${p.Option1}</button>
-      <button class="choice-btn" onclick="checkStage1('${p.Option2}')">${p.Option2}</button>
+      <button class="choice-btn" onclick="checkStage1('${opts[0]}')">${opts[0]}</button>
+      <button class="choice-btn" onclick="checkStage1('${opts[1]}')">${opts[1]}</button>
     </div>
     <div class="tutorial-bubble">소리를 들어보고 알맞은 글자를 골라요 🌟</div>
   `;
@@ -941,12 +869,9 @@ function checkStage1(sel){
   });
 }
 
-/* ==========================================================
-   11. Stage 2 - 쓰기 (받침 채우기)
-   ========================================================== */
+/* ===== 11. Stage 2 - 쓰기 ===== */
 function formatBlank(targetStr){
   if(!targetStr) return '';
-  // "다_" → 다 + 빈칸
   return targetStr.replace(/([가-힣])_/g,
     `<span class="batchim-blank"><span class="top">$1</span><span class="blank"></span></span>`);
 }
@@ -958,7 +883,7 @@ function renderStage2(){
   const p=appState.stage2[currentIndex];
   playTTS(`${currentIndex+1}번째 문제. ${p.Question}`);
   let choiceHTML='';
-  p.Choices.forEach(c=>{
+  shuffleArray(p.Choices).forEach(c=>{
     choiceHTML+=`<button class="choice-btn batchim" onclick="checkStage2('${c}')">${c}</button>`;
   });
   contentDiv.innerHTML=`
@@ -984,7 +909,6 @@ function checkStage2(sel){
   }
   logProblemResult(2,p.Word,p.Question,sel,true,helpUsedThisProblem);
   helpUsedThisProblem=false;
-  // 정답 표시
   const pb=document.querySelector('.problem-box');
   if(pb){pb.innerHTML=p.Word;pb.style.color='#1dd1a1';}
   showFeedbackOverlay(true,()=>{
@@ -999,9 +923,7 @@ function checkStage2(sel){
   });
 }
 
-/* ==========================================================
-   12. Stage 3 - 받침 고르기 (단어 통째 보고 받침 종류 고르기)
-   ========================================================== */
+/* ===== 12. Stage 3 - 받침 고르기 ===== */
 function renderStage3(){
   if(currentIndex>=appState.stage3.length){
     return goNextAfterStage(3);
@@ -1009,14 +931,14 @@ function renderStage3(){
   const p=appState.stage3[currentIndex];
   playTTS(`${currentIndex+1}번째 문제. ${p.Word}의 받침을 골라보세요.`);
   let choiceHTML='';
-  p.Choices.forEach(c=>{
+  shuffleArray(p.Choices).forEach(c=>{
     choiceHTML+=`<button class="choice-btn batchim" onclick="checkStage3('${c}')">${c}</button>`;
   });
   contentDiv.innerHTML=`
     <div class="stage-title">🎯 3단계: 받침 고르기 (${currentIndex+1}/${appState.stage3.length})</div>
     <div class="problem-card">
-      <div style="font-size:78px;color:#2c3e50;">${p.Word}</div>
-      <div style="font-size:28px;color:#576574;margin-top:10px;">${p.Hint||''}</div>
+      <div style="font-size:90px;color:#2c3e50;">${p.Word}</div>
+      <div style="font-size:30px;color:#576574;margin-top:10px;">${p.Hint||''}</div>
       <button class="btn-help" style="margin-top:15px;" onclick="openHelp()">🆘 도움받기</button>
     </div>
     <div class="choices-container">${choiceHTML}</div>
@@ -1046,25 +968,23 @@ function checkStage3(sel){
   });
 }
 
-/* ==========================================================
-   13. Stage 4 - 발음 찾기
-   ========================================================== */
+/* ===== 13. Stage 4 - 발음 찾기 ===== */
 function renderStage4(){
   if(currentIndex>=appState.stage4.length){
     return goNextAfterStage(4);
   }
   const p=appState.stage4[currentIndex];
-  const phon=p.Answer.replace(/\[|\]/g,'');
   playTTS(`${currentIndex+1}번째 문제. ${p.Word}는 어떻게 발음할까요?`);
+  const opts=shuffleArray([p.Option1,p.Option2]);
   contentDiv.innerHTML=`
     <div class="stage-title">👂 4단계: 발음 찾기 (${currentIndex+1}/${appState.stage4.length})</div>
     <div class="s4-word-card">${p.Word}</div>
-    <div style="font-size:24px;color:#576574;margin-bottom:20px;">올바른 발음을 골라요</div>
+    <div style="font-size:26px;color:#576574;margin-bottom:18px;">올바른 발음을 골라요</div>
     <div class="choices-container">
-      <button class="choice-btn pron" onclick="checkStage4('${p.Option1}')">${p.Option1}</button>
-      <button class="choice-btn pron-alt" onclick="checkStage4('${p.Option2}')">${p.Option2}</button>
+      <button class="choice-btn pron" onclick="checkStage4('${opts[0]}')">${opts[0]}</button>
+      <button class="choice-btn pron-alt" onclick="checkStage4('${opts[1]}')">${opts[1]}</button>
     </div>
-    <button class="btn-help" style="margin-top:20px;" onclick="openHelp()">🆘 도움받기</button>
+    <button class="btn-help" style="margin-top:18px;" onclick="openHelp()">🆘 도움받기</button>
     <div class="tutorial-bubble">잘 모르겠으면 도움받기를 눌러요 🆘</div>
   `;
 }
@@ -1091,11 +1011,8 @@ function checkStage4(sel){
   });
 }
 
-/* ==========================================================
-   14. 녹음 트리거 - 5문제마다 1번
-   ========================================================== */
+/* ===== 14. 녹음 트리거 ===== */
 function maybeRecordOrNext(wordToRecord,nextCallback){
-  // 현재 단계에서 녹음을 해야 할 인덱스인지 확인
   if(recordTriggerSet.has(currentIndex)){
     openRecordOverlay(wordToRecord,nextCallback);
   }else{
@@ -1110,108 +1027,38 @@ function goNextAfterStage(stageDone){
   else if(stageDone===4) renderReflection();
 }
 
-/* ==========================================================
-   15. Help (도움받기)
-   ========================================================== */
+/* ===== 15. Help ===== */
 let helpUsedThisProblem=false;
 
-// 단어별로 관련 예시 문장 모음 (도움받기에서 정확히 매칭됨)
 const helpExamples={
-  '닭':[
-    '마당에 닭이 꼬꼬댁 울어요.',
-    '닭이 알을 낳았어요.',
-    '닭은 ㄹㄱ 받침을 써요. [닥]이라고 소리 나요.'
-  ],
-  '앉다':[
-    '의자에 바르게 앉다.',
-    '동생이 내 옆에 앉다.',
-    '앉다는 ㄴㅈ 받침을 써요. [안따]라고 소리 나요.'
-  ],
-  '여덟':[
-    '사과 여덟 개를 셌어요.',
-    '오늘은 여덟 시에 자요.',
-    '여덟은 ㄹㅂ 받침을 써요. [여덜]이라고 소리 나요.'
-  ],
-  '값':[
-    '사과 값이 얼마예요?',
-    '시장에서 값을 깎았어요.',
-    '값은 ㅂㅅ 받침을 써요. [갑]이라고 소리 나요.'
-  ],
-  '몫':[
-    '내 몫은 잊지 않을게.',
-    '각자 자기 몫을 챙겨요.',
-    '몫은 ㄱㅅ 받침을 써요. [목]이라고 소리 나요.'
-  ],
-  '삶다':[
-    '달걀을 맛있게 삶다.',
-    '감자를 푹 삶다.',
-    '삶다는 ㄹㅁ 받침을 써요. [삼따]라고 소리 나요.'
-  ],
-  '넓다':[
-    '운동장이 아주 넓다.',
-    '바다는 정말 넓다.',
-    '넓다는 ㄹㅂ 받침을 써요. [널따]라고 소리 나요.'
-  ],
-  '밟다':[
-    '낙엽을 사뿐히 밟다.',
-    '실수로 친구 발을 밟다.',
-    '밟다는 ㄹㅂ 받침을 써요. [밥따]라고 소리 나요.'
-  ],
-  '핥다':[
-    '아이스크림을 살짝 핥다.',
-    '강아지가 손을 핥다.',
-    '핥다는 ㄹㅌ 받침을 써요. [할따]라고 소리 나요.'
-  ],
-  '읊다':[
-    '시를 천천히 읊다.',
-    '할아버지가 시조를 읊다.',
-    '읊다는 ㄹㅍ 받침을 써요. [읍따]라고 소리 나요.'
-  ],
-  '흙':[
-    '화분에 흙을 담아요.',
-    '비가 와서 흙이 젖었어요.',
-    '흙은 ㄹㄱ 받침을 써요. [흑]이라고 소리 나요.'
-  ],
-  '넋':[
-    '넋이 나간 것 같아요.',
-    '넋을 잃고 바라봤어요.',
-    '넋은 ㄱㅅ 받침을 써요. [넉]이라고 소리 나요.'
-  ],
-  '굶다':[
-    '배가 고파서 굶다.',
-    '아침을 굶다.',
-    '굶다는 ㄹㅁ 받침을 써요. [굼따]라고 소리 나요.'
-  ],
-  '훑다':[
-    '책을 한번 훑다.',
-    '내용을 쭉 훑다.',
-    '훑다는 ㄹㅌ 받침을 써요. [훌따]라고 소리 나요.'
-  ],
-  '맑다':[
-    '하늘이 정말 맑다.',
-    '시냇물이 맑다.',
-    '맑다는 ㄹㄱ 받침을 써요. [막따]라고 소리 나요.'
-  ],
-  '얹다':[
-    '머리에 모자를 얹다.',
-    '책 위에 손을 얹다.',
-    '얹다는 ㄴㅈ 받침을 써요. [언따]라고 소리 나요.'
-  ]
+  '닭':['마당에 닭이 꼬꼬댁 울어요.','닭이 알을 낳았어요.','닭은 ㄹㄱ 받침을 써요. [닥]이라고 소리 나요.'],
+  '앉다':['의자에 바르게 앉다.','동생이 내 옆에 앉다.','앉다는 ㄴㅈ 받침을 써요. [안따]라고 소리 나요.'],
+  '여덟':['사과 여덟 개를 셌어요.','오늘은 여덟 시에 자요.','여덟은 ㄹㅂ 받침을 써요. [여덜]이라고 소리 나요.'],
+  '값':['사과 값이 얼마예요?','시장에서 값을 깎았어요.','값은 ㅂㅅ 받침을 써요. [갑]이라고 소리 나요.'],
+  '몫':['내 몫은 잊지 않을게.','각자 자기 몫을 챙겨요.','몫은 ㄱㅅ 받침을 써요. [목]이라고 소리 나요.'],
+  '삶다':['달걀을 맛있게 삶다.','감자를 푹 삶다.','삶다는 ㄹㅁ 받침을 써요. [삼따]라고 소리 나요.'],
+  '넓다':['운동장이 아주 넓다.','바다는 정말 넓다.','넓다는 ㄹㅂ 받침을 써요. [널따]라고 소리 나요.'],
+  '밟다':['낙엽을 사뿐히 밟다.','실수로 친구 발을 밟다.','밟다는 ㄹㅂ 받침을 써요. [밥따]라고 소리 나요.'],
+  '핥다':['아이스크림을 살짝 핥다.','강아지가 손을 핥다.','핥다는 ㄹㅌ 받침을 써요. [할따]라고 소리 나요.'],
+  '읊다':['시를 천천히 읊다.','할아버지가 시조를 읊다.','읊다는 ㄹㅍ 받침을 써요. [읍따]라고 소리 나요.'],
+  '흙':['화분에 흙을 담아요.','비가 와서 흙이 젖었어요.','흙은 ㄹㄱ 받침을 써요. [흑]이라고 소리 나요.'],
+  '넋':['넋이 나간 것 같아요.','넋을 잃고 바라봤어요.','넋은 ㄱㅅ 받침을 써요. [넉]이라고 소리 나요.'],
+  '굶다':['배가 고파서 굶다.','아침을 굶다.','굶다는 ㄹㅁ 받침을 써요. [굼따]라고 소리 나요.'],
+  '훑다':['책을 한번 훑다.','내용을 쭉 훑다.','훑다는 ㄹㅌ 받침을 써요. [훌따]라고 소리 나요.'],
+  '맑다':['하늘이 정말 맑다.','시냇물이 맑다.','맑다는 ㄹㄱ 받침을 써요. [막따]라고 소리 나요.'],
+  '얹다':['머리에 모자를 얹다.','책 위에 손을 얹다.','얹다는 ㄴㅈ 받침을 써요. [언따]라고 소리 나요.']
 };
 
 function openHelp(){
   helpUsedThisProblem=true;
-  // 현재 단어 가져오기
   let curWord='';
   if(currentStage===1) curWord=appState.stage1[currentIndex]?.Answer;
   else if(currentStage===2) curWord=appState.stage2[currentIndex]?.Word;
   else if(currentStage===3) curWord=appState.stage3[currentIndex]?.Word;
   else if(currentStage===4) curWord=appState.stage4[currentIndex]?.Word;
 
-  // 현재 단어 관련 예시만 가져오기
   const sentences = helpExamples[curWord];
   let html='';
-  
   if(sentences && sentences.length){
     html=`<div style="font-size:22px;color:#4facfe;font-weight:bold;margin-bottom:10px;">📖 "${curWord}" 관련 예시</div>`;
     sentences.forEach(s=>{
@@ -1219,7 +1066,6 @@ function openHelp(){
         <button onclick="playUserTTS('${s.replace(/'/g,"\\'")}')">🔊 들어보기</button></div>`;
     });
   }else{
-    // 예시가 준비되지 않은 단어
     html=`<div style="font-size:22px;color:#e15f41;padding:15px;background:#fff3cd;border-radius:14px;margin-bottom:10px;">
       "${curWord||'이 문제'}"의 예시 문장이 아직 준비되지 않았어요.<br>
       소리 듣기 버튼을 눌러서 발음을 들어보세요!
@@ -1229,7 +1075,6 @@ function openHelp(){
       <button onclick="playUserTTS('${(curWord||'').replace(/'/g,"\\'")}')">🔊 들어보기</button>
     </div>`;
   }
-  
   document.getElementById('help-examples').innerHTML=html;
   document.getElementById('help-overlay').classList.add('show');
 }
@@ -1238,9 +1083,7 @@ function closeHelp(){
   document.getElementById('help-overlay').classList.remove('show');
 }
 
-/* ==========================================================
-   16. Record Overlay
-   ========================================================== */
+/* ===== 16. Record Overlay ===== */
 let recordState=0;
 let finishRecordCallback=null;
 let finalTranscript='';
@@ -1299,7 +1142,6 @@ function submitKeyboard(){
     return;
   }
   finalTranscript=txt;
-  // 키보드 입력은 녹음없이 통과 → 자기평가 단계로
   audioBlob=null;audioBase64='';
   goSelfEval();
 }
@@ -1312,7 +1154,6 @@ window.handleRecordClick=async function(){
   const btn=document.getElementById('record-btn');
   const status=document.getElementById('record-status');
   if(recordState===0){
-    // 녹음 시작
     try{
       audioChunks=[];finalTranscript='';
       if(recognition){try{recognition.abort();}catch(e){} recognition.start();}
@@ -1323,7 +1164,6 @@ window.handleRecordClick=async function(){
       status.innerHTML=`<span style="color:#555;">여기에 여러분의 목소리가 글자로 나타나요!</span>`;
     }catch(e){console.error(e);}
   }else if(recordState===1){
-    // 녹음 종료
     recordState=2;
     btn.textContent='⏳';btn.disabled=true;
     btn.classList.remove('recording-anim');
@@ -1345,11 +1185,9 @@ window.handleRecordClick=async function(){
   }
 };
 
-/* ==========================================================
-   17. Self-evaluation (별점)
-   ========================================================== */
+/* ===== 17. Self-evaluation ===== */
 let currentStars=0;
-let hasListenedToRecording=false; // 녹음을 들어봤는지
+let hasListenedToRecording=false;
 
 function goSelfEval(){
   document.getElementById('record-overlay').classList.remove('show');
@@ -1360,33 +1198,26 @@ function goSelfEval(){
   document.getElementById('eval-text').textContent='🎧 내 녹음 듣기를 눌러서 먼저 들어볼까요?';
   document.getElementById('eval-warn').classList.remove('show');
   document.getElementById('eval-next-btn').disabled=true;
-  // 듣기 버튼 강조 (반짝이게)
   const playBtn = document.querySelector('.eval-playback-btn');
   if(playBtn) playBtn.classList.add('highlight-pulse');
   playTTS('내 녹음을 들어보고 별점을 골라요!');
 }
 
 function setStars(n){
-  // 녹음을 아직 안 들었으면 부드럽게 안내
   if(!hasListenedToRecording){
     document.getElementById('eval-text').innerHTML='✨ <span style="color:#ff6b6b;">먼저 🎧 내 녹음 듣기를 눌러서 들어보세요!</span>';
-    // 별점은 임시로만 표시 (시각적 피드백은 줌)
     document.querySelectorAll('.star-btn').forEach(b=>{
       const v=parseInt(b.dataset.val);
       b.classList.toggle('active',v<=n);
     });
-    // 듣기 버튼 더 크게 강조
     const playBtn = document.querySelector('.eval-playback-btn');
     if(playBtn){
       playBtn.classList.add('shake-anim');
       setTimeout(()=>playBtn.classList.remove('shake-anim'),600);
     }
-    // 다음 버튼은 비활성화 유지
     document.getElementById('eval-next-btn').disabled=true;
     return;
   }
-  
-  // 정상 별점 처리
   currentStars=n;
   document.querySelectorAll('.star-btn').forEach(b=>{
     const v=parseInt(b.dataset.val);
@@ -1413,7 +1244,6 @@ function playMyRecording(){
   if(!audioBlob){
     if(finalTranscript) playUserTTS(finalTranscript);
     else playUserTTS('녹음이 없어요.');
-    // 키보드 입력의 경우엔 들었다고 처리
     hasListenedToRecording=true;
     afterListening();
     return;
@@ -1427,7 +1257,6 @@ function playMyRecording(){
     hasListenedToRecording=true;
     afterListening();
   };
-  // 재생 시작 시점에서도 들은 것으로 인정 (혹시 끝나기 전에 별점 누를 수도)
   setTimeout(()=>{
     hasListenedToRecording=true;
     afterListening();
@@ -1435,13 +1264,11 @@ function playMyRecording(){
 }
 
 function afterListening(){
-  // 듣기 버튼 강조 해제
   const playBtn = document.querySelector('.eval-playback-btn');
   if(playBtn){
     playBtn.classList.remove('highlight-pulse');
     playBtn.classList.add('listened');
   }
-  // 안내 문구 변경
   if(currentStars===0){
     document.getElementById('eval-text').textContent='잘 들었나요? 이제 별점을 골라요 ⭐';
   }
@@ -1468,9 +1295,7 @@ function finishEval(){
   finishRecordCallback=null;
 }
 
-/* ==========================================================
-   18. Reflection (전체 끝나고 1번)
-   ========================================================== */
+/* ===== 18. Reflection ===== */
 let reflectionData={hardest:'',mood:'',selfMessage:''};
 
 function renderReflection(){
@@ -1480,7 +1305,6 @@ function renderReflection(){
   ov.id='reflection-ov';
   ov.innerHTML=`
     <div class="reflection-title">🌈 오늘의 배움 정리하기 🌈</div>
-
     <div class="reflection-q">오늘 가장 어려웠던 받침은?</div>
     <div class="reflection-options" data-group="hardest">
       <button onclick="pickReflection('hardest','ㄹㄱ',this)">ㄹㄱ (닭)</button>
@@ -1489,21 +1313,18 @@ function renderReflection(){
       <button onclick="pickReflection('hardest','ㅂㅅ',this)">ㅂㅅ (값)</button>
       <button onclick="pickReflection('hardest','없어요',this)">하나도 안 어려웠어요!</button>
     </div>
-
     <div class="reflection-q">오늘 활동 기분은?</div>
     <div class="reflection-options" data-group="mood">
       <button onclick="pickReflection('mood','😄 재미있었어요',this)">😄 재미있었어요</button>
       <button onclick="pickReflection('mood','🤔 조금 어려웠어요',this)">🤔 조금 어려웠어요</button>
       <button onclick="pickReflection('mood','💪 더 잘하고 싶어요',this)">💪 더 잘하고 싶어요</button>
     </div>
-
     <div class="reflection-q">스스로에게 한마디!</div>
     <div class="reflection-options" data-group="selfMessage">
       <button onclick="pickReflection('selfMessage','잘했어 나 자신!',this)">잘했어 나 자신! 👍</button>
       <button onclick="pickReflection('selfMessage','다음에도 화이팅!',this)">다음에도 화이팅! 💪</button>
       <button onclick="pickReflection('selfMessage','정말 멋졌어!',this)">정말 멋졌어! 🌟</button>
     </div>
-
     <button class="btn-primary" style="background:#1dd1a1;font-size:30px;padding:15px 40px;margin-top:18px;" onclick="finishReflection()">📝 정리 완료!</button>
   `;
   document.getElementById('app-container').appendChild(ov);
@@ -1528,17 +1349,12 @@ function finishReflection(){
   renderCompletion();
 }
 
-/* ==========================================================
-   19. Completion / 배움 기록표
-   ========================================================== */
-let reportAudioElements=[];
-
+/* ===== 19. Completion ===== */
 function renderCompletion(){
   playTTS('모든 학습을 마쳤어요! 정말 대단해요!');
   rainConfetti();
   showRewardPop('🏆');
 
-  // 통계
   const total=problemLog.filter(x=>x.type==='problem').length;
   const correct=problemLog.filter(x=>x.type==='problem'&&x.isCorrect==='O').length;
   const helpCount=problemLog.filter(x=>x.helpUsed==='O').length;
@@ -1574,7 +1390,6 @@ function renderCompletion(){
     </div>
   `;
 
-  // 다른 audio 재생 시 이전 audio 자동 멈춤
   setTimeout(()=>{
     document.querySelectorAll('audio.report-audio').forEach(a=>{
       a.addEventListener('play',()=>{
