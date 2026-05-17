@@ -293,6 +293,26 @@ button:disabled{cursor:not-allowed;opacity:0.6;}
   font-size:30px;padding:15px 35px;background:#4facfe;color:white;
   border-radius:25px;margin-bottom:25px;display:flex;align-items:center;gap:10px;
   box-shadow:0 6px 15px rgba(79,172,254,0.4);
+  transition:all 0.3s;
+}
+.eval-playback-btn.highlight-pulse{
+  animation:highlight-pulse 1.6s infinite;
+}
+.eval-playback-btn.listened{
+  background:#1dd1a1;
+  box-shadow:0 6px 15px rgba(29,209,161,0.4);
+}
+.eval-playback-btn.shake-anim{
+  animation:shake 0.5s;
+}
+@keyframes highlight-pulse{
+  0%,100%{transform:scale(1);box-shadow:0 6px 15px rgba(79,172,254,0.4);}
+  50%{transform:scale(1.05);box-shadow:0 8px 25px rgba(79,172,254,0.7);}
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0);}
+  25%{transform:translateX(-8px);}
+  75%{transform:translateX(8px);}
 }
 .stars-row{display:flex;gap:12px;margin-bottom:10px;}
 .star-btn{
@@ -439,8 +459,8 @@ audio.report-audio{height:40px;outline:none;max-width:260px;}
   <!-- Self-evaluation Overlay -->
   <div id="eval-overlay" class="eval-overlay">
     <h2 class="eval-title">⭐ 스스로 평가해볼까요? ⭐</h2>
-    <div class="eval-subtitle">내 녹음을 들어보고 별을 골라요!</div>
-    <button class="eval-playback-btn" onclick="playMyRecording()">🎧 내 녹음 듣기</button>
+    <div class="eval-subtitle">먼저 내 녹음을 들어보고 별을 골라요!</div>
+    <button class="eval-playback-btn highlight-pulse" onclick="playMyRecording()">🎧 내 녹음 듣기</button>
     <div class="stars-row" id="stars-row">
       <button class="star-btn" data-val="1" onclick="setStars(1)">★</button>
       <button class="star-btn" data-val="2" onclick="setStars(2)">★</button>
@@ -448,7 +468,7 @@ audio.report-audio{height:40px;outline:none;max-width:260px;}
       <button class="star-btn" data-val="4" onclick="setStars(4)">★</button>
       <button class="star-btn" data-val="5" onclick="setStars(5)">★</button>
     </div>
-    <div class="eval-text" id="eval-text">별을 눌러서 점수를 정해요</div>
+    <div class="eval-text" id="eval-text">🎧 내 녹음 듣기를 눌러서 먼저 들어볼까요?</div>
     <div class="eval-warn" id="eval-warn">3개 이하예요. 다시 한 번 도전해볼까요?</div>
     <div class="eval-actions">
       <button class="btn-redo" onclick="redoRecording()">🔄 다시 녹음하기</button>
@@ -484,7 +504,7 @@ resizeApp();
 /* ==========================================================
    2. Global State
    ========================================================== */
-const GAS_URL='https://script.google.com/macros/s/AKfycbxlDiABM19D8ObofOYwYmUuOOFJql5GNY48h3cAoY0wm-0TUGl5lJBiGUPVRBlP_z9lLw/exec'; // ★ 배포 후 받은 웹앱 URL을 여기에 붙여넣으세요.
+const GAS_URL='https://script.google.com/macros/s/AKfycbxlDiABM19D8ObofOYwYmUuOOFJql5GNY48h3cAoY0wm-0TUGl5lJBiGUPVRBlP_z9lLw/exec'; // ★ 배포 후 받은 웹앱 URL
 
 let isSpeakerOn=false;
 let currentUser='';
@@ -681,20 +701,28 @@ function renderIntro(){
   const opts=appState.students.map(s=>`<option value="${s}">${s}</option>`).join('');
   contentDiv.innerHTML=`
     <h1 class="intro-title">🎉 겹받침 읽고 쓰기 🎉</h1>
-    <div style="background:white;padding:14px 28px;border-radius:18px;border:3px dashed #4facfe;margin-bottom:14px;font-size:20px;color:#555;text-align:center;max-width:1000px;">
-      <div style="font-weight:bold;color:#4facfe;margin-bottom:6px;font-size:22px;">오늘의 모험 순서 🚀</div>
+    <div style="background:#fff8d6;border:3px solid #feca57;border-radius:18px;padding:12px 26px;margin-bottom:10px;text-align:center;max-width:1000px;">
+      <div style="font-weight:bold;color:#e1820f;font-size:21px;margin-bottom:5px;">🎯 오늘의 목표</div>
+      <div style="font-size:19px;color:#7a5a10;line-height:1.5;">
+        이 활동이 끝나면 우리는<br>
+        👉 겹받침을 <b style="background:white;padding:1px 8px;border-radius:8px;">정확히 읽고</b>
+        👉 <b style="background:white;padding:1px 8px;border-radius:8px;">정확히 쓰고</b>
+        👉 <b style="background:white;padding:1px 8px;border-radius:8px;">문장에서 사용</b>할 수 있어요!
+      </div>
+    </div>
+    <div style="background:white;padding:10px 26px;border-radius:16px;border:3px dashed #4facfe;margin-bottom:10px;font-size:19px;color:#555;text-align:center;max-width:1000px;">
+      <span style="font-weight:bold;color:#4facfe;">모험 순서 🚀</span>
       <span style="color:#ff6b6b;">1️⃣ 읽기</span> ➡️
       <span style="color:#ff9f43;">2️⃣ 쓰기</span> ➡️
       <span style="color:#feca57;">3️⃣ 받침 고르기</span> ➡️
       <span style="color:#1dd1a1;">4️⃣ 발음 찾기</span>
     </div>
-    <div style="font-size:22px;color:#576574;margin-bottom:6px;">이름을 골라요 👇</div>
+    <div style="font-size:21px;color:#576574;margin-bottom:4px;">이름을 골라요 👇</div>
     <select id="student-select" class="intro-select">${opts}</select>
-    <button class="btn-secondary" id="init-mic-btn" onclick="requestMic()" style="margin-top:14px;">🎤 마이크 준비하기</button>
-    <button class="btn-primary" style="background:#1dd1a1;margin-top:10px;" onclick="goLevelSelect()">▶️ 시작하기</button>
+    <button class="btn-secondary" id="init-mic-btn" onclick="requestMic()" style="margin-top:12px;">🎤 마이크 준비하기</button>
+    <button class="btn-primary" style="background:#1dd1a1;margin-top:8px;" onclick="goLevelSelect()">▶️ 시작하기</button>
     <div class="tutorial-bubble">먼저 마이크 버튼을 눌러서 마이크를 준비해요! 💡</div>
   `;
-  // 음성 우선순위 다시 로딩 시도
   setTimeout(loadVoices,300);
 }
 
@@ -1321,25 +1349,56 @@ window.handleRecordClick=async function(){
    17. Self-evaluation (별점)
    ========================================================== */
 let currentStars=0;
+let hasListenedToRecording=false; // 녹음을 들어봤는지
 
 function goSelfEval(){
   document.getElementById('record-overlay').classList.remove('show');
   document.getElementById('eval-overlay').classList.add('show');
   currentStars=0;
+  hasListenedToRecording=false;
   document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('eval-text').textContent='별을 눌러서 점수를 정해요';
+  document.getElementById('eval-text').textContent='🎧 내 녹음 듣기를 눌러서 먼저 들어볼까요?';
   document.getElementById('eval-warn').classList.remove('show');
   document.getElementById('eval-next-btn').disabled=true;
+  // 듣기 버튼 강조 (반짝이게)
+  const playBtn = document.querySelector('.eval-playback-btn');
+  if(playBtn) playBtn.classList.add('highlight-pulse');
   playTTS('내 녹음을 들어보고 별점을 골라요!');
 }
 
 function setStars(n){
+  // 녹음을 아직 안 들었으면 부드럽게 안내
+  if(!hasListenedToRecording){
+    document.getElementById('eval-text').innerHTML='✨ <span style="color:#ff6b6b;">먼저 🎧 내 녹음 듣기를 눌러서 들어보세요!</span>';
+    // 별점은 임시로만 표시 (시각적 피드백은 줌)
+    document.querySelectorAll('.star-btn').forEach(b=>{
+      const v=parseInt(b.dataset.val);
+      b.classList.toggle('active',v<=n);
+    });
+    // 듣기 버튼 더 크게 강조
+    const playBtn = document.querySelector('.eval-playback-btn');
+    if(playBtn){
+      playBtn.classList.add('shake-anim');
+      setTimeout(()=>playBtn.classList.remove('shake-anim'),600);
+    }
+    // 다음 버튼은 비활성화 유지
+    document.getElementById('eval-next-btn').disabled=true;
+    return;
+  }
+  
+  // 정상 별점 처리
   currentStars=n;
   document.querySelectorAll('.star-btn').forEach(b=>{
     const v=parseInt(b.dataset.val);
     b.classList.toggle('active',v<=n);
   });
-  const msgs={1:'다음엔 더 잘할 수 있어!',2:'조금만 더 연습해요',3:'잘했어요! 한 번 더 도전해볼까?',4:'아주 잘했어요! 👍',5:'완벽해요! 🌟'};
+  const msgs={
+    1:'다시 녹음해서 더 잘 해볼까요?',
+    2:'다시 녹음해서 더 잘 해볼까요?',
+    3:'다시 녹음해서 더 잘 해볼까요?',
+    4:'훌륭해요! 자신 있게 다음으로 가요 👍',
+    5:'완벽해요! 자신 있게 다음으로 가요 🌟'
+  };
   document.getElementById('eval-text').textContent=msgs[n];
   if(n<=3){
     document.getElementById('eval-warn').classList.add('show');
@@ -1352,8 +1411,11 @@ function setStars(n){
 
 function playMyRecording(){
   if(!audioBlob){
-    if(finalTranscript) playTTS(finalTranscript);
-    else playTTS('녹음이 없어요.');
+    if(finalTranscript) playUserTTS(finalTranscript);
+    else playUserTTS('녹음이 없어요.');
+    // 키보드 입력의 경우엔 들었다고 처리
+    hasListenedToRecording=true;
+    afterListening();
     return;
   }
   stopAllAudio();
@@ -1361,12 +1423,35 @@ function playMyRecording(){
   if(currentAudioElement){try{currentAudioElement.pause();}catch(e){}}
   currentAudioElement=new Audio(url);
   currentAudioElement.play();
+  currentAudioElement.onended=()=>{
+    hasListenedToRecording=true;
+    afterListening();
+  };
+  // 재생 시작 시점에서도 들은 것으로 인정 (혹시 끝나기 전에 별점 누를 수도)
+  setTimeout(()=>{
+    hasListenedToRecording=true;
+    afterListening();
+  },1500);
+}
+
+function afterListening(){
+  // 듣기 버튼 강조 해제
+  const playBtn = document.querySelector('.eval-playback-btn');
+  if(playBtn){
+    playBtn.classList.remove('highlight-pulse');
+    playBtn.classList.add('listened');
+  }
+  // 안내 문구 변경
+  if(currentStars===0){
+    document.getElementById('eval-text').textContent='잘 들었나요? 이제 별점을 골라요 ⭐';
+  }
 }
 
 function redoRecording(){
   currentRedoCount++;
   document.getElementById('eval-overlay').classList.remove('show');
   audioBlob=null;audioBase64='';audioChunks=[];finalTranscript='';recordState=0;
+  hasListenedToRecording=false;
   document.getElementById('record-word-card').textContent=currentRecordWord;
   document.getElementById('record-status').textContent='다시 녹음해볼까요? 마이크 버튼을 눌러요.';
   const btn=document.getElementById('record-btn');
