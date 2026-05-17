@@ -567,12 +567,24 @@ var WORD_IMAGES={
   '얹다':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="112" rx="26" ry="6" fill="#00000012"/><circle cx="60" cy="68" r="23" fill="#ffd9a0"/><circle cx="51" cy="66" r="2.7" fill="#222"/><circle cx="69" cy="66" r="2.7" fill="#222"/><path d="M54 76 q6 5 12 0" stroke="#c0392b" stroke-width="2.5" fill="none" stroke-linecap="round"/><ellipse cx="60" cy="44" rx="32" ry="8" fill="#e74c3c"/><path d="M41 44 q0 -21 19 -21 q19 0 19 21z" fill="#e74c3c"/><circle cx="60" cy="25" r="4" fill="#feca57"/></svg>'
 };
 
+var BOOK_SVG='<svg viewBox="0 0 120 120" width="110" height="110"><ellipse cx="60" cy="106" rx="28" ry="6" fill="#00000010"/><rect x="34" y="36" width="52" height="58" rx="6" fill="#4facfe"/><rect x="42" y="44" width="36" height="42" rx="3" fill="#fff"/><path d="M50 56 l20 0 M50 66 l20 0 M50 76 l14 0" stroke="#aacdf0" stroke-width="3.5" stroke-linecap="round"/></svg>';
+
 function getWordImage(word){
-  var def='<svg viewBox="0 0 120 120" width="110" height="110"><ellipse cx="60" cy="106" rx="28" ry="6" fill="#00000010"/><rect x="34" y="36" width="52" height="58" rx="6" fill="#4facfe"/><rect x="42" y="44" width="36" height="42" rx="3" fill="#fff"/><path d="M50 56 l20 0 M50 66 l20 0 M50 76 l14 0" stroke="#aacdf0" stroke-width="3.5" stroke-linecap="round"/></svg>';
   if(word && typeof word==='string' && WORD_IMAGES[word.trim()]){
     return WORD_IMAGES[word.trim()];
   }
-  return def;
+  return BOOK_SVG;
+}
+
+// 여러 후보 중 WORD_IMAGES에 그림이 있는 것을 찾아 반환
+function pickWordImage(){
+  for(var i=0;i<arguments.length;i++){
+    var w=arguments[i];
+    if(w && typeof w==='string' && WORD_IMAGES[w.trim()]){
+      return WORD_IMAGES[w.trim()];
+    }
+  }
+  return BOOK_SVG;
 }
 
 /* ==========================================================
@@ -1069,7 +1081,7 @@ function renderStage3(){
     <div class="stage-title">🎯 3단계: 받침 고르기 (${currentIndex+1}/${appState.stage3.length})</div>
     <div class="problem-card">
       <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
-        <div style="flex-shrink:0;">${getWordImage(p.Word)}</div>
+        <div style="flex-shrink:0;">${pickWordImage(p.Word)}</div>
         <div style="font-size:70px;color:#2c3e50;">${p.Word}</div>
       </div>
       <div style="font-size:26px;color:#576574;margin-top:8px;">${p.Hint||''}</div>
@@ -1116,7 +1128,7 @@ function renderStage4(){
   contentDiv.innerHTML=`
     <div class="stage-title">👂 4단계: 발음 찾기 (${currentIndex+1}/${appState.stage4.length})</div>
     <div style="display:flex;align-items:center;gap:15px;margin-bottom:8px;">
-      <div style="flex-shrink:0;">${getWordImage(p.Word)}</div>
+      <div style="flex-shrink:0;">${pickWordImage(p.Word)}</div>
       <div class="s4-word-card" style="margin-bottom:0;">${p.Word}</div>
     </div>
     <div style="font-size:24px;color:#576574;margin-bottom:16px;">올바른 발음을 골라요</div>
