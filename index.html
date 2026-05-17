@@ -514,17 +514,17 @@ let problemLog=[];        // 문제별 기록 (정답/오답/도움받기)
 let appState={
   students:['학생1','학생2','학생3'],
   stage1:[
-    {Question:'소리는 [닥]이지만 쓸 때는?',SoundText:'꼬끼오~ 닭',Option1:'닥',Option2:'닭',Answer:'닭',Concept:'ㄹㄱ 받침',Feedback:"딩동댕! 소리는 [닥]이지만 쓸 때는 'ㄹㄱ' 받침을 써야 해."},
-    {Question:'의자에 편안하게 [안따].',SoundText:'의자에 앉다',Option1:'앉다',Option2:'안다',Answer:'앉다',Concept:'ㄴㅈ 받침',Feedback:"맞아! '안다'는 친구를 안아줄 때 쓰고, 의자에는 '앉다'를 써."},
-    {Question:'숫자 8은 어떻게 쓸까요?',SoundText:'여덟',Option1:'여덟',Option2:'여덜',Answer:'여덟',Concept:'ㄹㅂ 받침',Feedback:"참 잘했어! 소리는 [여덜]이지만 'ㄹㅂ' 받침이 있는 '여덟'이야."},
-    {Question:'물건의 [갑]을 물어봐요.',SoundText:'얼마예요? 값',Option1:'갑',Option2:'값',Answer:'값',Concept:'ㅂㅅ 받침',Feedback:"훌륭해! 물건의 가격을 뜻할 때는 '값'이라고 써."}
+    {Image:'🐔',Question:'소리는 [닥]이지만 쓸 때는?',SoundText:'꼬끼오~ 닭',Option1:'닥',Option2:'닭',Answer:'닭',Concept:'ㄹㄱ 받침',Feedback:"딩동댕! 소리는 [닥]이지만 쓸 때는 'ㄹㄱ' 받침을 써야 해."},
+    {Image:'🪑',Question:'의자에 편안하게 [안따].',SoundText:'의자에 앉다',Option1:'앉다',Option2:'안다',Answer:'앉다',Concept:'ㄴㅈ 받침',Feedback:"맞아! '안다'는 친구를 안아줄 때 쓰고, 의자에는 '앉다'를 써."},
+    {Image:'8️⃣',Question:'숫자 8은 어떻게 쓸까요?',SoundText:'여덟',Option1:'여덟',Option2:'여덜',Answer:'여덟',Concept:'ㄹㅂ 받침',Feedback:"참 잘했어! 소리는 [여덜]이지만 'ㄹㅂ' 받침이 있는 '여덟'이야."},
+    {Image:'🏷️',Question:'물건의 [갑]을 물어봐요.',SoundText:'얼마예요? 값',Option1:'갑',Option2:'값',Answer:'값',Concept:'ㅂㅅ 받침',Feedback:"훌륭해! 물건의 가격을 뜻할 때는 '값'이라고 써."}
   ],
   stage2:[
-    {Question:'그림에 알맞은 받침을 골라요.',Word:'닭',Target:'다_',Choices:['ㄱ','ㄹㄱ','ㄴㅈ','ㄹㅂ'],Answer:'ㄹㄱ'},
-    {Question:'의자에 편안하게 ___.',Word:'앉다',Target:'아_ 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄱㅅ'],Answer:'ㄴㅈ'},
-    {Question:'물건의 ___을 물어봐요.',Word:'값',Target:'가_',Choices:['ㅂ','ㅂㅅ','ㄹㅁ','ㄹㅍ'],Answer:'ㅂㅅ'}
+    {Image:'🐔',Question:'그림에 알맞은 받침을 골라요.',Word:'닭',Target:'다_',Choices:['ㄱ','ㄹㄱ','ㄴㅈ','ㄹㅂ'],Answer:'ㄹㄱ'},
+    {Image:'🪑',Question:'의자에 편안하게 ___.',Word:'앉다',Target:'아_ 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄱㅅ'],Answer:'ㄴㅈ'},
+    {Image:'🏷️',Question:'물건의 ___을 물어봐요.',Word:'값',Target:'가_',Choices:['ㅂ','ㅂㅅ','ㄹㅁ','ㄹㅍ'],Answer:'ㅂㅅ'}
   ],
-  stage3:[ // 받침 고르기
+  stage3:[ // 받침 고르기 - 새로 정의 (단순화: 단어보고 받침 종류만 고르기)
     {Word:'닭',Hint:'ㄷ + ㅏ + ___',Choices:['ㄱ','ㄹㄱ','ㄴㅈ','ㄱㅅ'],Answer:'ㄹㄱ'},
     {Word:'앉다',Hint:'ㅇ + ㅏ + ___ + 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄹㅌ'],Answer:'ㄴㅈ'},
     {Word:'값',Hint:'ㄱ + ㅏ + ___',Choices:['ㅂ','ㅂㅅ','ㄴㅈ','ㄹㄱ'],Answer:'ㅂㅅ'}
@@ -544,48 +544,6 @@ let problemsPerStage=5;
 let recordTriggerSet=new Set(); // 어느 인덱스에서 녹음할지 미리 정해둠
 
 const contentDiv=document.getElementById('scene-content');
-
-/* ==========================================================
-   2.5 단어별 SVG 그림 (이모지 대체) - 안전한 단순 도형 버전
-   ========================================================== */
-var WORD_IMAGES={
-  '닭':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="106" rx="32" ry="7" fill="#00000012"/><ellipse cx="63" cy="74" rx="27" ry="25" fill="#f5b942"/><circle cx="48" cy="46" r="19" fill="#f5b942"/><path d="M40 30 q4 -11 9 -3 q5 -9 9 -1 q4 9 -5 11z" fill="#e74c3c"/><circle cx="43" cy="45" r="3" fill="#222"/><path d="M30 48 l-12 3 l12 4z" fill="#f39c12"/><path d="M44 56 q-3 7 3 8z" fill="#e74c3c"/><path d="M54 97 l-3 12 M61 98 l1 11" stroke="#f39c12" stroke-width="4" stroke-linecap="round"/></svg>',
-  '앉다':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="110" rx="32" ry="6" fill="#00000012"/><rect x="70" y="46" width="9" height="58" rx="3" fill="#8d6e4e"/><rect x="42" y="74" width="40" height="9" rx="3" fill="#a17a52"/><rect x="45" y="83" width="8" height="22" rx="3" fill="#8d6e4e"/><circle cx="55" cy="38" r="14" fill="#ffd9a0"/><path d="M41 35 q14 -19 28 0 q-7 -6 -14 -5 q-8 0 -14 5z" fill="#5b3a1e"/><circle cx="51" cy="39" r="2.3" fill="#222"/><circle cx="61" cy="39" r="2.3" fill="#222"/><path d="M53 47 q4 4 8 0" stroke="#c0392b" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M55 52 q-12 4 -12 22 l24 0 q2 -18 -6 -22z" fill="#4fa3e0"/><rect x="58" y="74" width="8" height="30" rx="3" fill="#ffd9a0"/></svg>',
-  '여덟':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="112" rx="30" ry="6" fill="#00000012"/><text x="60" y="56" font-size="52" font-weight="bold" fill="#ff6b6b" text-anchor="middle" font-family="Jua">8</text><circle cx="32" cy="80" r="7" fill="#1dd1a1"/><circle cx="50" cy="80" r="7" fill="#1dd1a1"/><circle cx="68" cy="80" r="7" fill="#1dd1a1"/><circle cx="86" cy="80" r="7" fill="#1dd1a1"/><circle cx="32" cy="98" r="7" fill="#1dd1a1"/><circle cx="50" cy="98" r="7" fill="#1dd1a1"/><circle cx="68" cy="98" r="7" fill="#1dd1a1"/><circle cx="86" cy="98" r="7" fill="#1dd1a1"/></svg>',
-  '값':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="110" rx="30" ry="6" fill="#00000012"/><path d="M30 40 l36 -15 q5 -2 9 2 l23 23 q4 4 2 9 l-15 36 q-2 5 -9 4 l-40 -14 q-4 -2 -5 -7 l-2 -25 q0 -4 4 -6z" fill="#feca57" stroke="#e8a72e" stroke-width="3"/><circle cx="45" cy="48" r="7" fill="#fff" stroke="#e8a72e" stroke-width="3"/><text x="68" y="78" font-size="30" font-weight="bold" fill="#e15f41" text-anchor="middle" font-family="Jua">100</text></svg>',
-  '몫':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="108" rx="32" ry="7" fill="#00000012"/><circle cx="60" cy="62" r="38" fill="#ffe0b2"/><path d="M60 62 L60 24 A38 38 0 0 1 92 50 Z" fill="#ff9f9f"/><path d="M60 62 L92 50 A38 38 0 0 1 80 94 Z" fill="#ffd36b"/><path d="M60 62 L80 94 A38 38 0 0 1 36 96 Z" fill="#a8e6a3"/><path d="M60 62 L36 96 A38 38 0 0 1 60 24 Z" fill="#9fd3f5"/><circle cx="60" cy="62" r="5" fill="#fff"/></svg>',
-  '흙':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="112" rx="28" ry="6" fill="#00000012"/><path d="M36 60 l48 0 l-6 44 q-1 5 -6 5 l-24 0 q-5 0 -6 -5z" fill="#d98c4a"/><rect x="32" y="52" width="56" height="13" rx="4" fill="#e89a5c"/><ellipse cx="60" cy="59" rx="24" ry="7" fill="#6b4226"/><circle cx="51" cy="59" r="3" fill="#4a2d18"/><circle cx="68" cy="60" r="3" fill="#4a2d18"/><path d="M60 57 q-3 -15 -10 -20 M60 57 q3 -13 10 -17" stroke="#3da35d" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="50" cy="36" r="6" fill="#52c878"/><circle cx="70" cy="40" r="6" fill="#52c878"/></svg>',
-  '핥다':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="58" cy="112" rx="24" ry="6" fill="#00000012"/><path d="M48 62 l22 0 l-9 44 q-2 4 -4 0z" fill="#f4c98a"/><path d="M44 62 q4 -22 15 -22 q12 0 16 22 q-15 6 -31 0z" fill="#ffb3c8"/><circle cx="53" cy="48" r="8" fill="#ffd9e6"/><circle cx="66" cy="50" r="7" fill="#fff0a0"/><circle cx="59" cy="40" r="7" fill="#b8e8c0"/><ellipse cx="38" cy="78" rx="12" ry="8" fill="#ff8fa8"/></svg>',
-  '읊다':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="110" rx="32" ry="7" fill="#00000012"/><path d="M60 38 q-21 -11 -30 -4 l0 53 q11 -6 30 2z" fill="#fff" stroke="#9b8cc4" stroke-width="3"/><path d="M60 38 q21 -11 30 -4 l0 53 q-11 -6 -30 2z" fill="#f3f0fb" stroke="#9b8cc4" stroke-width="3"/><path d="M36 48 l15 2 M36 58 l15 2 M36 68 l13 2" stroke="#b0a4d4" stroke-width="2.5" stroke-linecap="round"/><path d="M69 48 l15 -2 M69 58 l15 -2 M69 68 l15 -2" stroke="#b0a4d4" stroke-width="2.5" stroke-linecap="round"/></svg>',
-  '넋':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="113" rx="22" ry="5" fill="#00000010"/><path d="M38 70 q0 -32 22 -32 q22 0 22 32 l0 28 q-5 -7 -9 0 q-5 7 -9 0 q-5 -7 -9 0 q-4 7 -8 0z" fill="#eef2f7" stroke="#c3cedb" stroke-width="2.5"/><ellipse cx="52" cy="62" rx="4" ry="6" fill="#7a8aa0"/><ellipse cx="68" cy="62" rx="4" ry="6" fill="#7a8aa0"/><ellipse cx="60" cy="74" rx="5" ry="6" fill="#7a8aa0"/></svg>',
-  '굶다':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="106" rx="34" ry="7" fill="#00000012"/><path d="M28 64 q32 20 64 0 q-4 28 -32 28 q-28 0 -32 -28z" fill="#fff" stroke="#bcdfe8" stroke-width="3"/><ellipse cx="60" cy="64" rx="32" ry="8" fill="#e8f4f7" stroke="#bcdfe8" stroke-width="3"/><ellipse cx="60" cy="64" rx="20" ry="5" fill="#d4e9ef"/><circle cx="52" cy="44" r="3" fill="#e88"/><circle cx="60" cy="42" r="3" fill="#e88"/><circle cx="68" cy="44" r="3" fill="#e88"/></svg>',
-  '훑다':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="110" rx="28" ry="6" fill="#00000012"/><rect x="56" y="20" width="7" height="52" rx="3" fill="#b5793f" transform="rotate(18 60 46)"/><path d="M62 70 q17 4 28 24 q-21 6 -40 -7 q4 -15 12 -17z" fill="#f5c563" stroke="#d6a23f" stroke-width="2.5"/><path d="M67 76 l9 20 M75 74 l11 18" stroke="#d6a23f" stroke-width="2.5" stroke-linecap="round"/></svg>',
-  '넓다':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="112" rx="28" ry="5" fill="#00000010"/><path d="M14 76 q46 -21 92 0 l0 25 q-46 13 -92 0z" fill="#7ecb6a"/><circle cx="80" cy="34" r="12" fill="#ffd95e"/><path d="M80 16 l0 -7 M96 25 l5 -4 M64 25 l-5 -4" stroke="#ffd95e" stroke-width="3.5" stroke-linecap="round"/><ellipse cx="38" cy="30" rx="13" ry="7" fill="#fff"/><ellipse cx="49" cy="30" rx="9" ry="6" fill="#fff"/></svg>',
-  '밟다':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="110" rx="30" ry="6" fill="#00000012"/><path d="M32 88 q-5 -13 8 -15 q4 -11 13 -6 q9 -9 15 2 q11 -2 9 11 q13 6 2 15 q-24 7 -47 -4z" fill="#e8893f" stroke="#cf7530" stroke-width="2.5"/><ellipse cx="58" cy="52" rx="19" ry="12" fill="#ffd9a0"/><circle cx="45" cy="49" r="5" fill="#ffd9a0"/><circle cx="51" cy="44" r="5" fill="#ffd9a0"/><circle cx="59" cy="41" r="5" fill="#ffd9a0"/><circle cx="66" cy="42" r="4" fill="#ffd9a0"/></svg>',
-  '삶다':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="110" rx="32" ry="7" fill="#00000012"/><path d="M30 64 l60 0 l-5 32 q-1 6 -8 6 l-34 0 q-7 0 -8 -6z" fill="#9aa7b5"/><rect x="26" y="58" width="68" height="9" rx="4" fill="#b4c0cc"/><ellipse cx="48" cy="80" rx="9" ry="9" fill="#fff"/><ellipse cx="48" cy="81" rx="4" ry="4" fill="#ffd95e"/><ellipse cx="68" cy="82" rx="9" ry="9" fill="#fff"/><ellipse cx="68" cy="83" rx="4" ry="4" fill="#ffd95e"/><path d="M46 50 q-4 -7 2 -13 M62 49 q-4 -7 2 -13" stroke="#cdd6df" stroke-width="4" fill="none" stroke-linecap="round"/></svg>',
-  '맑다':'<svg viewBox="0 0 120 120" width="112" height="112"><circle cx="60" cy="60" r="46" fill="#aee3ff"/><circle cx="50" cy="50" r="18" fill="#ffd95e"/><path d="M50 24 l0 -8 M50 84 l0 8 M24 50 l-8 0 M76 50 l8 0 M31 31 l-6 -6 M69 31 l6 -6" stroke="#ffd95e" stroke-width="4" stroke-linecap="round"/><ellipse cx="76" cy="76" rx="17" ry="10" fill="#fff"/><ellipse cx="62" cy="80" rx="11" ry="8" fill="#fff"/></svg>',
-  '얹다':'<svg viewBox="0 0 120 120" width="112" height="112"><ellipse cx="60" cy="112" rx="26" ry="6" fill="#00000012"/><circle cx="60" cy="68" r="23" fill="#ffd9a0"/><circle cx="51" cy="66" r="2.7" fill="#222"/><circle cx="69" cy="66" r="2.7" fill="#222"/><path d="M54 76 q6 5 12 0" stroke="#c0392b" stroke-width="2.5" fill="none" stroke-linecap="round"/><ellipse cx="60" cy="44" rx="32" ry="8" fill="#e74c3c"/><path d="M41 44 q0 -21 19 -21 q19 0 19 21z" fill="#e74c3c"/><circle cx="60" cy="25" r="4" fill="#feca57"/></svg>'
-};
-
-var BOOK_SVG='<svg viewBox="0 0 120 120" width="110" height="110"><ellipse cx="60" cy="106" rx="28" ry="6" fill="#00000010"/><rect x="34" y="36" width="52" height="58" rx="6" fill="#4facfe"/><rect x="42" y="44" width="36" height="42" rx="3" fill="#fff"/><path d="M50 56 l20 0 M50 66 l20 0 M50 76 l14 0" stroke="#aacdf0" stroke-width="3.5" stroke-linecap="round"/></svg>';
-
-function getWordImage(word){
-  if(word && typeof word==='string' && WORD_IMAGES[word.trim()]){
-    return WORD_IMAGES[word.trim()];
-  }
-  return BOOK_SVG;
-}
-
-// 여러 후보 중 WORD_IMAGES에 그림이 있는 것을 찾아 반환
-function pickWordImage(){
-  for(var i=0;i<arguments.length;i++){
-    var w=arguments[i];
-    if(w && typeof w==='string' && WORD_IMAGES[w.trim()]){
-      return WORD_IMAGES[w.trim()];
-    }
-  }
-  return BOOK_SVG;
-}
 
 /* ==========================================================
    3. Audio - Speaker / TTS / SFX
@@ -722,23 +680,10 @@ window.onload=()=>{
       .then(data=>{
         if(data.success){
           appState.students=data.students||appState.students;
-          // 유효한 데이터만 받기 (Answer/Word가 있는 것만)
-          if(data.stage1 && data.stage1.length){
-            const valid=data.stage1.filter(p=>p&&p.Answer&&p.Question);
-            if(valid.length) appState.stage1=valid;
-          }
-          if(data.stage2 && data.stage2.length){
-            const valid=data.stage2.filter(p=>p&&p.Word&&p.Choices);
-            if(valid.length) appState.stage2=valid;
-          }
-          if(data.stage3 && data.stage3.length){
-            const valid=data.stage3.filter(p=>p&&p.Word&&p.Choices);
-            if(valid.length) appState.stage3=valid;
-          }
-          if(data.stage4 && data.stage4.length){
-            const valid=data.stage4.filter(p=>p&&p.Word&&p.Answer);
-            if(valid.length) appState.stage4=valid;
-          }
+          appState.stage1=(data.stage1&&data.stage1.length)?data.stage1:appState.stage1;
+          appState.stage2=(data.stage2&&data.stage2.length)?data.stage2:appState.stage2;
+          appState.stage3=(data.stage3&&data.stage3.length)?data.stage3:appState.stage3;
+          appState.stage4=(data.stage4&&data.stage4.length)?data.stage4:appState.stage4;
         }
         renderIntro();
       })
@@ -807,16 +752,6 @@ function shuffleSlice(arr,n){
     [a[i],a[j]]=[a[j],a[i]];
   }
   return a.slice(0,n);
-}
-
-// 배열을 그냥 섞기 (보기 순서 랜덤화용)
-function shuffleArray(arr){
-  const a=[...arr];
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-  return a;
 }
 
 function startWithCount(count){
@@ -1074,18 +1009,15 @@ function renderStage3(){
   const p=appState.stage3[currentIndex];
   playTTS(`${currentIndex+1}번째 문제. ${p.Word}의 받침을 골라보세요.`);
   let choiceHTML='';
-  shuffleArray(p.Choices).forEach(c=>{
+  p.Choices.forEach(c=>{
     choiceHTML+=`<button class="choice-btn batchim" onclick="checkStage3('${c}')">${c}</button>`;
   });
   contentDiv.innerHTML=`
     <div class="stage-title">🎯 3단계: 받침 고르기 (${currentIndex+1}/${appState.stage3.length})</div>
     <div class="problem-card">
-      <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
-        <div style="flex-shrink:0;">${pickWordImage(p.Word)}</div>
-        <div style="font-size:70px;color:#2c3e50;">${p.Word}</div>
-      </div>
-      <div style="font-size:26px;color:#576574;margin-top:8px;">${p.Hint||''}</div>
-      <button class="btn-help" style="margin-top:12px;" onclick="openHelp()">🆘 도움받기</button>
+      <div style="font-size:78px;color:#2c3e50;">${p.Word}</div>
+      <div style="font-size:28px;color:#576574;margin-top:10px;">${p.Hint||''}</div>
+      <button class="btn-help" style="margin-top:15px;" onclick="openHelp()">🆘 도움받기</button>
     </div>
     <div class="choices-container">${choiceHTML}</div>
     <div class="tutorial-bubble">단어 속에 숨은 겹받침을 찾아요! 🎯</div>
@@ -1122,21 +1054,17 @@ function renderStage4(){
     return goNextAfterStage(4);
   }
   const p=appState.stage4[currentIndex];
+  const phon=p.Answer.replace(/\[|\]/g,'');
   playTTS(`${currentIndex+1}번째 문제. ${p.Word}는 어떻게 발음할까요?`);
-  // 보기 순서 랜덤화
-  const opts=shuffleArray([p.Option1,p.Option2]);
   contentDiv.innerHTML=`
     <div class="stage-title">👂 4단계: 발음 찾기 (${currentIndex+1}/${appState.stage4.length})</div>
-    <div style="display:flex;align-items:center;gap:15px;margin-bottom:8px;">
-      <div style="flex-shrink:0;">${pickWordImage(p.Word)}</div>
-      <div class="s4-word-card" style="margin-bottom:0;">${p.Word}</div>
-    </div>
-    <div style="font-size:24px;color:#576574;margin-bottom:16px;">올바른 발음을 골라요</div>
+    <div class="s4-word-card">${p.Word}</div>
+    <div style="font-size:24px;color:#576574;margin-bottom:20px;">올바른 발음을 골라요</div>
     <div class="choices-container">
-      <button class="choice-btn pron" onclick="checkStage4('${opts[0]}')">${opts[0]}</button>
-      <button class="choice-btn pron-alt" onclick="checkStage4('${opts[1]}')">${opts[1]}</button>
+      <button class="choice-btn pron" onclick="checkStage4('${p.Option1}')">${p.Option1}</button>
+      <button class="choice-btn pron-alt" onclick="checkStage4('${p.Option2}')">${p.Option2}</button>
     </div>
-    <button class="btn-help" style="margin-top:18px;" onclick="openHelp()">🆘 도움받기</button>
+    <button class="btn-help" style="margin-top:20px;" onclick="openHelp()">🆘 도움받기</button>
     <div class="tutorial-bubble">잘 모르겠으면 도움받기를 눌러요 🆘</div>
   `;
 }
