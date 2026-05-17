@@ -727,9 +727,13 @@ const wordImages={
   </svg>`
 };
 
-// 단어에 맞는 그림 반환 (없으면 기본 별 그림)
+// 단어에 맞는 그림 반환 (없으면 기본 책 그림)
 function getWordImage(word){
-  if(wordImages[word]) return wordImages[word];
+  // 방어: 단어가 없거나 문자열이 아니면 기본 그림
+  if(word && typeof word==='string'){
+    const w=word.trim();
+    if(wordImages[w]) return wordImages[w];
+  }
   // 기본: 책 그림
   return `<svg viewBox="0 0 120 120" width="110" height="110">
     <ellipse cx="60" cy="106" rx="30" ry="6" fill="#00000010"/>
@@ -875,10 +879,23 @@ window.onload=()=>{
       .then(data=>{
         if(data.success){
           appState.students=data.students||appState.students;
-          appState.stage1=(data.stage1&&data.stage1.length)?data.stage1:appState.stage1;
-          appState.stage2=(data.stage2&&data.stage2.length)?data.stage2:appState.stage2;
-          appState.stage3=(data.stage3&&data.stage3.length)?data.stage3:appState.stage3;
-          appState.stage4=(data.stage4&&data.stage4.length)?data.stage4:appState.stage4;
+          // 유효한 데이터만 받기 (Answer/Word가 있는 것만)
+          if(data.stage1 && data.stage1.length){
+            const valid=data.stage1.filter(p=>p&&p.Answer&&p.Question);
+            if(valid.length) appState.stage1=valid;
+          }
+          if(data.stage2 && data.stage2.length){
+            const valid=data.stage2.filter(p=>p&&p.Word&&p.Choices);
+            if(valid.length) appState.stage2=valid;
+          }
+          if(data.stage3 && data.stage3.length){
+            const valid=data.stage3.filter(p=>p&&p.Word&&p.Choices);
+            if(valid.length) appState.stage3=valid;
+          }
+          if(data.stage4 && data.stage4.length){
+            const valid=data.stage4.filter(p=>p&&p.Word&&p.Answer);
+            if(valid.length) appState.stage4=valid;
+          }
         }
         renderIntro();
       })
